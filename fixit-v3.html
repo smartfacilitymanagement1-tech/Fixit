@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FixIt — Home Services Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+:root {
+  --or:#8B5CF6; --or2:#A78BFA; --or3:rgba(139,92,246,0.12);
+  --dk:#F8F5FF; --dk2:#FFFFFF; --dk3:#F0EBF8; --card:#FFFFFF;
+  --bdr:#E2D9F3; --txt:#1A0A2E; --muted:#9B8CB5;
+  --grn:#22C55E; --grn2:rgba(34,197,94,0.10);
+  --blu:#3B82F6; --blu2:rgba(59,130,246,0.10);
+  --yel:#F59E0B; --red:#EF4444; --red2:rgba(239,68,68,0.08);
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--dk);color:var(--txt);overflow-x:hidden;min-height:100vh;}
+h1,h2,h3,.brand,.syne{font-family:'Syne',sans-serif;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+input,select,textarea{font-family:'DM Sans',sans-serif;}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+
+/* ══ SPLASH ══ */
+#splash{background:radial-gradient(ellipse at 40% 0%,#E8D5FF 0%,var(--dk) 65%);align-items:center;justify-content:center;text-align:center;padding:40px 24px;position:relative;overflow:hidden;}
+#splash::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.1) 0%,transparent 65%);top:-150px;left:50%;transform:translateX(-50%);animation:glow 5s ease-in-out infinite;}
+@keyframes glow{0%,100%{opacity:0.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.08)}}
+.logo-big{font-size:64px;font-weight:800;letter-spacing:-3px;position:relative;z-index:1;}
+.logo-big span{color:var(--or);}
+.tagline{color:var(--muted);font-size:13px;letter-spacing:3px;text-transform:uppercase;margin:10px 0 52px;position:relative;z-index:1;}
+.role-grid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:460px;position:relative;z-index:1;}
+.role-btn{flex:1;min-width:120px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:26px 16px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.role-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,92,246,.1),transparent);opacity:0;transition:.25s;}
+.role-btn:hover{border-color:var(--or);transform:translateY(-4px);}
+.role-btn:hover::before{opacity:1;}
+.role-btn .rb-icon{font-size:34px;margin-bottom:10px;}
+.role-btn h3{font-size:16px;font-weight:700;}
+.role-btn p{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{background:var(--dk2);align-items:center;justify-content:center;padding:40px 24px;}
+.login-box{width:100%;max-width:380px;}
+.login-logo{font-size:32px;font-weight:800;margin-bottom:6px;}
+.login-logo span{color:var(--or);}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:36px;}
+.login-tabs{display:flex;background:var(--dk3);border-radius:10px;padding:4px;margin-bottom:24px;}
+.ltab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;transition:.2s;color:var(--muted);}
+.ltab.active{background:var(--or);color:white;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
+.form-input{width:100%;background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);border-radius:10px;padding:12px 14px;font-size:14px;transition:.2s;outline:none;}
+.form-input:focus{border-color:var(--or);}
+.form-input::placeholder{color:var(--muted);}
+.form-row{display:flex;gap:12px;}
+.form-row .form-group{flex:1;}
+.btn-primary{width:100%;background:var(--or);color:white;border:none;border-radius:12px;padding:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;transition:all .2s;letter-spacing:.3px;}
+.btn-primary:hover{background:var(--or2);}
+.btn-primary:active{transform:scale(.98);}
+.otp-note{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
+.demo-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px;}
+.demo-link{font-size:11px;padding:5px 12px;background:var(--dk3);border:1px solid var(--bdr);border-radius:20px;cursor:pointer;color:var(--muted);transition:.2s;}
+.demo-link:hover{border-color:var(--or);color:var(--or);}
+
+/* ══ TOPBAR ══ */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--dk2);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:90;}
+.logo{font-size:22px;font-weight:800;}
+.logo span{color:var(--or);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.notif-btn{position:relative;width:36px;height:36px;background:var(--dk3);border:1px solid var(--bdr);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s;}
+.notif-btn:hover{border-color:var(--or);}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--or);border-radius:50%;border:2px solid var(--dk2);animation:ping .8s ease infinite;}
+@keyframes ping{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.avatar-chip{display:flex;align-items:center;gap:8px;background:var(--dk3);border:1px solid var(--bdr);border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;}
+.chip-avatar{width:26px;height:26px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.chip-name{font-size:12px;font-weight:500;}
+.back-btn{background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);padding:7px 14px;border-radius:9px;font-size:12px;transition:.2s;}
+.back-btn:hover{border-color:var(--or);}
+
+/* ══ BOTTOM NAV ══ */
+.bnav{position:sticky;bottom:0;background:var(--dk2);border-top:1px solid var(--bdr);display:flex;padding:6px 0 2px;z-index:89;}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px;color:var(--muted);font-size:10px;font-weight:500;transition:.2s;}
+.bnav-item.active{color:var(--or);}
+.bnav-icon{font-size:20px;}
+
+/* ══ SECTION LABEL ══ */
+.slabel{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:0 18px;margin-bottom:12px;}
+
+/* ══ CUSTOMER HOME ══ */
+#cust-home{background:var(--dk);}
+.loc-bar{display:flex;align-items:center;gap:10px;background:var(--dk3);border:1px solid var(--bdr);border-radius:12px;padding:11px 14px;margin:14px 18px;cursor:pointer;transition:.2s;}
+.loc-bar:hover{border-color:var(--or);}
+.loc-dot{width:10px;height:10px;background:var(--or);border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px rgba(219,39,119,.2);}
+.loc-txt{flex:1;}
+.loc-txt strong{display:block;font-size:13px;}
+.loc-txt small{font-size:11px;color:var(--muted);}
+.loc-range{font-size:11px;color:var(--grn);font-weight:600;}
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 16px;}
+.svc-tile{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.svc-tile.active{border-color:var(--or);background:var(--or3);}
+.svc-tile:hover{transform:translateY(-2px);border-color:var(--or2);}
+.svc-tile .ti{font-size:26px;margin-bottom:6px;}
+.svc-tile .tn{font-size:10px;font-weight:500;line-height:1.3;}
+.dropdown-wrap{margin-bottom:6px;}
+.drop-panel{background:#FFFFFF;border-top:2px solid var(--or);border-bottom:1px solid var(--bdr);padding:18px;animation:slideD .28s ease;}
+@keyframes slideD{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.drop-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.drop-hdr h3{font-size:17px;font-weight:700;}
+.sub-list{display:flex;flex-direction:column;gap:8px;}
+.sub-item{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--bdr);border-radius:11px;padding:12px 14px;cursor:pointer;transition:.2s;}
+.sub-item:hover{border-color:var(--or);background:rgba(139,92,246,.04);}
+.si-l{display:flex;align-items:center;gap:10px;}
+.si-icon{font-size:18px;}
+.si-name{font-size:13px;font-weight:500;}
+.si-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.si-price{font-size:13px;font-weight:600;color:var(--or);}
+
+/* ══ BOOKINGS ══ */
+#cust-bookings{background:var(--dk);}
+.booking-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin:0 18px 10px;transition:.2s;}
+.booking-card:hover{border-color:var(--bdr);}
+.bc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.bc-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.5px;}
+.badge.completed{background:var(--grn2);color:var(--grn);border:1px solid rgba(34,197,94,.25);}
+.badge.active{background:var(--or3);color:var(--or);border:1px solid rgba(219,39,119,.3);}
+.badge.pending{background:var(--blu2);color:var(--blu);border:1px solid rgba(59,130,246,.25);}
+.badge.cancelled{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.bc-info{display:flex;gap:14px;flex-wrap:wrap;}
+.bc-i{font-size:11px;color:var(--muted);}
+.bc-i strong{display:block;font-size:12px;color:var(--txt);margin-bottom:1px;}
+.bc-actions{display:flex;gap:8px;margin-top:12px;}
+.btn-sm{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;transition:.2s;border:none;}
+.btn-track{background:var(--or);color:white;}
+.btn-track:hover{background:var(--or2);}
+.btn-rate{background:var(--dk3);color:var(--txt);border:1px solid var(--bdr);}
+.btn-rate:hover{border-color:var(--yel);color:var(--yel);}
+.btn-cancel{background:var(--dk3);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.btn-cancel:hover{background:rgba(239,68,68,0.08);}
+
+/* ══ CHAT ══ */
+#cust-chat{background:var(--dk);}
+.chat-list-item{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:.15s;}
+.chat-list-item:hover{background:#FFFFFF;}
+.chat-av{width:44px;height:44px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.chat-info{flex:1;}
+.chat-name{font-size:14px;font-weight:600;}
+.chat-preview{font-size:12px;color:var(--muted);margin-top:2px;}
+.chat-meta{text-align:right;}
+.chat-time{font-size:11px;color:var(--muted);}
+.chat-unread{background:var(--or);color:white;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:4px;margin-left:auto;}
+.chat-window{display:flex;flex-direction:column;height:calc(100vh - 112px);}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:75%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;}
+.msg.recv{background:#EDE8F8;border-radius:14px 14px 14px 4px;align-self:flex-start;}
+.msg.sent{background:var(--or);border-radius:14px 14px 4px 14px;align-self:flex-end;}
+.msg-time{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;text-align:right;}
+.chat-input-bar{display:flex;gap:10px;padding:12px 18px;border-top:1px solid var(--bdr);background:#FFFFFF;}
+.chat-input{flex:1;background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);border-radius:20px;padding:10px 16px;font-size:13px;outline:none;transition:.2s;}
+.chat-input:focus{border-color:var(--or);}
+.send-btn{width:40px;height:40px;background:var(--or);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;transition:.2s;}
+.send-btn:hover{background:var(--or2);}
+
+/* ══ PROFILE ══ */
+#cust-profile{background:var(--dk);}
+.profile-hero{background:linear-gradient(135deg,rgba(139,92,246,.15),transparent);border-bottom:1px solid var(--bdr);padding:28px 18px;}
+.ph-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.ph-av{width:70px;height:70px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;}
+.ph-info h2{font-size:20px;font-weight:700;}
+.ph-info p{font-size:12px;color:var(--muted);margin-top:3px;}
+.ph-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.ph-stat{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;}
+.ph-stat-v{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--or);}
+.ph-stat-l{font-size:10px;color:var(--muted);margin-top:2px;}
+.settings-list{padding:16px 18px;display:flex;flex-direction:column;gap:2px;}
+.setting-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-radius:12px;margin-bottom:4px;cursor:pointer;transition:.2s;}
+.setting-item:hover{background:var(--dk3);}
+.si-icon2{font-size:20px;width:36px;height:36px;background:var(--dk3);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.si-text{flex:1;}
+.si-title{font-size:14px;font-weight:500;}
+.si-hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.si-arrow{color:var(--muted);font-size:14px;}
+.signout-btn{width:calc(100% - 36px);margin:8px 18px 24px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,.25);color:var(--red);border-radius:12px;padding:13px;font-weight:600;font-size:14px;transition:.2s;}
+.signout-btn:hover{background:rgba(239,68,68,.2);}
+
+/* ══ MAP / TRACKING ══ */
+#tracking-screen{background:var(--dk);}
+#map{height:260px;width:100%;position:relative;z-index:1;}
+.leaflet-container{background:#E8E0F5!important;}
+.tracking-body{padding:18px;flex:1;overflow-y:auto;padding-bottom:80px;}
+.status-track{display:flex;position:relative;margin-bottom:24px;}
+.status-track::before{content:'';position:absolute;top:13px;left:13px;right:13px;height:2px;background:var(--bdr);z-index:0;}
+.st-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;}
+.st-dot{width:26px;height:26px;border-radius:50%;background:var(--dk3);border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;transition:.4s;}
+.st-dot.done{background:var(--grn);border-color:var(--grn);}
+.st-dot.now{background:var(--or);border-color:var(--or);animation:ring 1.5s ease infinite;}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(139,92,246,.5)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.st-lbl{font-size:9px;color:var(--muted);text-align:center;max-width:60px;}
+.st-lbl.now{color:var(--or);font-weight:700;}
+.eta-bar{background:var(--grn2);border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.eta-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--grn);}
+.eta-lbl{font-size:11px;color:var(--muted);}
+.eta-sub{font-size:12px;color:var(--txt);margin-top:2px;}
+.live-pill{background:var(--grn);color:#000;font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;letter-spacing:1px;animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.worker-bar{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.wb-av{width:52px;height:52px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.wb-info{flex:1;}
+.wb-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.wb-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.wb-actions{display:flex;gap:8px;}
+.wbtn{width:38px;height:38px;border-radius:50%;background:var(--dk3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.2s;}
+.wbtn:hover{border-color:var(--or);}
+
+/* ══ PAYMENT MODAL ══ */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-end;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal-sheet{background:#FFFFFF;border-radius:22px 22px 0 0;border-top:2px solid var(--or);padding:24px 20px 36px;width:100%;animation:up .3s cubic-bezier(.22,1,.36,1);}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bdr);}
+.dr-lbl{font-size:12px;color:var(--muted);}
+.dr-val{font-size:13px;font-weight:500;}
+.dr-val.or{color:var(--or);}
+.dr-val.grn{color:var(--grn);}
+.providers-near{margin:16px 0;}
+.pnear-hdr{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.prov-row{display:flex;align-items:center;gap:10px;padding:11px;background:var(--card);border:1px solid var(--bdr);border-radius:11px;margin-bottom:7px;cursor:pointer;transition:.2s;}
+.prov-row.sel{border-color:var(--or);}
+.prov-row:hover{border-color:var(--or2);}
+.prov-av{width:40px;height:40px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.prov-info{flex:1;}
+.prov-nm{font-size:13px;font-weight:600;}
+.prov-mt{font-size:11px;color:var(--muted);margin-top:2px;}
+.prov-rt{text-align:right;}
+.prov-dist{font-size:11px;color:var(--grn);font-weight:600;}
+.prov-eta{font-size:10px;color:var(--muted);margin-top:2px;}
+.stars{color:var(--yel);font-size:10px;}
+.payment-methods{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+.pm-btn{flex:1;min-width:70px;background:var(--dk3);border:1px solid var(--bdr);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:.2s;font-size:11px;font-weight:500;}
+.pm-btn.sel{border-color:var(--or);background:var(--or3);color:var(--or);}
+.pm-icon{font-size:18px;display:block;margin-bottom:4px;}
+.book-btn{width:100%;background:var(--or);color:white;border:none;border-radius:13px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;letter-spacing:.3px;transition:all .2s;}
+.book-btn:hover{background:var(--or2);}
+.book-btn:active{transform:scale(.98);}
+
+/* ══ RATING MODAL ══ */
+.rating-stars{display:flex;justify-content:center;gap:8px;margin:16px 0;}
+.rstar{font-size:36px;cursor:pointer;transition:.15s;filter:grayscale(1);}
+.rstar.on{filter:grayscale(0);transform:scale(1.1);}
+.rating-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.rtag{padding:7px 14px;background:var(--dk3);border:1px solid var(--bdr);border-radius:20px;font-size:12px;cursor:pointer;transition:.2s;}
+.rtag.sel{border-color:var(--or);background:var(--or3);color:var(--or);}
+.rating-note{width:100%;background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);border-radius:10px;padding:11px 13px;font-size:13px;resize:none;outline:none;margin-bottom:16px;}
+.rating-note:focus{border-color:var(--or);}
+
+/* ══ NOTIFICATION PANEL ══ */
+.notif-panel{display:none;position:fixed;top:60px;right:12px;width:320px;background:#FFFFFF;border:1px solid var(--bdr);border-radius:16px;z-index:150;box-shadow:0 20px 60px rgba(100,60,180,.15);overflow:hidden;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.notif-panel.open{display:block;}
+.np-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bdr);}
+.np-hdr h4{font-size:14px;font-weight:700;}
+.np-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:.15s;}
+.notif-item:hover{background:var(--dk3);}
+.notif-item.unread{background:rgba(139,92,246,.04);}
+.ni-icon{font-size:20px;flex-shrink:0;}
+.ni-text{flex:1;}
+.ni-title{font-size:13px;font-weight:600;}
+.ni-msg{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.ni-time{font-size:10px;color:var(--muted);margin-top:4px;}
+.ni-dot{width:7px;height:7px;background:var(--or);border-radius:50%;flex-shrink:0;margin-top:6px;}
+
+/* ══ PROVIDER SCREEN ══ */
+#prov-screen{background:var(--dk);}
+.prov-hdr{background:linear-gradient(135deg,rgba(139,92,246,.12),transparent);border-bottom:1px solid var(--bdr);padding:20px 18px;}
+.ph2-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.ph2-av{width:56px;height:56px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.ph2-name h2{font-size:19px;font-weight:700;}
+.ph2-name p{font-size:12px;color:var(--muted);margin-top:2px;}
+.toggle-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:11px 14px;}
+.tswitch{width:46px;height:25px;background:var(--bdr);border-radius:13px;position:relative;cursor:pointer;transition:.3s;flex-shrink:0;}
+.tswitch.on{background:var(--grn);}
+.tswitch::after{content:'';position:absolute;width:19px;height:19px;background:white;border-radius:50%;top:3px;left:3px;transition:.3s;}
+.tswitch.on::after{transform:translateX(21px);}
+.tlbl{font-size:13px;font-weight:500;}
+.tlbl small{display:block;font-size:10px;color:var(--muted);}
+.p-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 18px;}
+.pstat{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 10px;text-align:center;}
+.pstat-v{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--or);}
+.pstat-l{font-size:10px;color:var(--muted);margin-top:3px;}
+.job-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin:0 18px 10px;transition:.2s;}
+.job-card.incoming{border-color:var(--or);background:rgba(139,92,246,.05);animation:newjob .4s ease;}
+@keyframes newjob{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+.jc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.jc-type{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.jc-info{display:flex;gap:12px;flex-wrap:wrap;}
+.ji{font-size:11px;color:var(--muted);}
+.ji strong{display:block;font-size:12px;color:var(--txt);margin-bottom:1px;}
+.jc-actions{display:flex;gap:8px;margin-top:12px;}
+.btn-accept{flex:1;background:var(--grn);color:#000;border:none;border-radius:9px;padding:10px;font-size:12px;font-weight:700;transition:.2s;}
+.btn-accept:hover{opacity:.85;}
+.btn-decline{flex:1;background:transparent;color:var(--muted);border:1px solid var(--bdr);border-radius:9px;padding:10px;font-size:12px;font-weight:500;transition:.2s;}
+.btn-decline:hover{border-color:var(--red);color:var(--red);}
+
+/* ══ EARNINGS ══ */
+#prov-earnings{background:var(--dk);}
+.earn-hero{background:linear-gradient(135deg,rgba(139,92,246,.15),transparent);border-bottom:1px solid var(--bdr);padding:24px 18px;}
+.earn-total{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:var(--or);}
+.earn-lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+.earn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px;}
+.earn-box{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;}
+.eb-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
+.eb-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+.bar-chart{padding:18px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bar-day{font-size:11px;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:8px;background:var(--dk3);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--or),var(--or2));border-radius:4px;transition:.6s ease;}
+.bar-val{font-size:11px;font-weight:500;width:44px;text-align:right;flex-shrink:0;}
+.txn-item{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--bdr);}
+.txn-l{display:flex;align-items:center;gap:10px;}
+.txn-icon{width:36px;height:36px;background:var(--grn2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.txn-name{font-size:13px;font-weight:500;}
+.txn-date{font-size:11px;color:var(--muted);margin-top:2px;}
+.txn-amt{font-size:14px;font-weight:700;color:var(--grn);}
+
+/* ══ ADMIN ══ */
+#admin-screen{background:var(--dk);}
+.admin-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#FFFFFF;border-bottom:1px solid #E2D9F3;}
+.admin-logo{font-size:20px;font-weight:800;}
+.admin-logo span{color:var(--or);}
+.admin-badge{background:var(--or);color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:1px;}
+.admin-nav{display:flex;gap:0;background:#FFFFFF;border-bottom:1px solid #E2D9F3;overflow-x:auto;padding:0 8px;}
+.anav-btn{padding:12px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;}
+.anav-btn.active{color:var(--or);border-bottom-color:var(--or);}
+.admin-section{display:none;padding:16px 18px;flex:1;overflow-y:auto;padding-bottom:40px;}
+.admin-section.active{display:block;}
+.admin-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+.kpi-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;}
+.kpi-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;}
+.kpi-lbl{font-size:11px;color:var(--muted);margin-top:4px;}
+.kpi-change{font-size:10px;margin-top:6px;font-weight:600;}
+.kpi-change.up{color:var(--grn);}
+.kpi-change.dn{color:var(--red);}
+.admin-table{background:var(--card);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.at-hdr{display:grid;padding:10px 14px;background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.at-row{display:grid;padding:12px 14px;border-bottom:1px solid var(--bdr);align-items:center;font-size:12px;}
+.at-row:last-child{border-bottom:none;}
+.at-row:hover{background:var(--dk3);}
+.status-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;}
+.status-chip.online{background:var(--grn2);color:var(--grn);}
+.status-chip.offline{background:var(--bdr);color:var(--muted);}
+.status-chip.busy{background:var(--or3);color:var(--or);}
+
+/* Admin Rate Management */
+.rate-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px;}
+.rate-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.rate-title{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.rate-save{background:var(--or);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+.rate-save:hover{background:var(--or2);}
+.rate-items{display:flex;flex-direction:column;gap:8px;}
+.rate-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--dk3);border-radius:10px;}
+.ri-name{flex:1;font-size:12px;font-weight:500;}
+.ri-input-wrap{display:flex;align-items:center;gap:4px;background:var(--dk2);border:1px solid var(--bdr);border-radius:8px;padding:4px 8px;transition:.2s;}
+.ri-input-wrap:focus-within{border-color:var(--or);}
+.ri-curr{font-size:12px;color:var(--muted);}
+.ri-input{background:none;border:none;color:var(--txt);font-size:12px;font-weight:600;width:60px;outline:none;text-align:right;}
+.rate-changed{border-color:var(--or)!important;background:rgba(139,92,246,.05)!important;}
+
+/* Admin Users Table */
+.users-grid{grid-template-columns:2fr 1fr 1fr 1fr;}
+/* Admin Bookings Table */
+.bk-grid{grid-template-columns:1fr 1.5fr 1fr 1fr;}
+/* Admin Providers Table */
+.pv-grid{grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--grn);color:#000;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:10px 20px;border-radius:25px;opacity:0;transition:.3s;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.error{background:var(--red);color:white;}
+.toast.info{background:var(--blu);color:white;}
+
+/* ══ MISC ══ */
+.divider{height:1px;background:var(--bdr);margin:0 18px;}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:13px;line-height:1.6;}
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--dk3);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;margin:0 18px 14px;}
+.search-bar input{flex:1;background:none;border:none;color:var(--txt);font-size:13px;outline:none;}
+.search-bar input::placeholder{color:var(--muted);}
+
+/* ══ PROVIDER REGISTRATION ══ */
+#prov-register{background:var(--dk);overflow-y:auto;}
+.reg-hero{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(219,39,119,.06));border-bottom:1px solid var(--bdr);padding:28px 20px 24px;}
+.reg-hero-top{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.reg-hero-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.reg-hero h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.reg-hero p{font-size:12px;color:var(--muted);margin-top:3px;}
+.reg-steps{display:flex;gap:0;position:relative;}
+.reg-steps::before{content:'';position:absolute;top:13px;left:13px;right:13px;height:2px;background:var(--bdr);}
+.reg-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1;}
+.rs-dot{width:26px;height:26px;border-radius:50%;background:var(--dk3);border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:.3s;}
+.rs-dot.done{background:var(--grn);border-color:var(--grn);color:white;}
+.rs-dot.active{background:var(--or);border-color:var(--or);color:white;}
+.rs-lbl{font-size:9px;color:var(--muted);text-align:center;max-width:56px;font-weight:500;}
+.rs-lbl.active{color:var(--or);font-weight:700;}
+.reg-body{padding:20px;padding-bottom:100px;}
+.reg-section{display:none;}
+.reg-section.active{display:block;}
+.reg-section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:14px 16px;background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(219,39,119,.04));border:1px solid var(--bdr);border-left:3px solid var(--or);border-radius:12px;}
+.rsh-icon{font-size:22px;}
+.rsh-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.rsh-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:4px;}
+.upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--dk3);}
+.upload-box:hover{border-color:var(--or);background:rgba(139,92,246,.04);}
+.upload-box .ub-icon{font-size:28px;margin-bottom:6px;}
+.upload-box .ub-title{font-size:13px;font-weight:600;color:var(--txt);}
+.upload-box .ub-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.service-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.svc-check{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--dk3);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;transition:.2s;font-size:13px;}
+.svc-check.checked{border-color:var(--or);background:rgba(139,92,246,.06);}
+.svc-check input[type=checkbox]{accent-color:var(--or);width:14px;height:14px;flex-shrink:0;}
+.bank-card{background:linear-gradient(135deg,#8B5CF6,#DB2777);border-radius:16px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;color:white;}
+.bank-card::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05);top:-60px;right:-40px;}
+.bank-card::after{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.05);bottom:-50px;left:-30px;}
+.bc-chip{width:34px;height:24px;background:rgba(255,255,255,.2);border-radius:4px;margin-bottom:14px;position:relative;z-index:1;}
+.bc-num{font-size:13px;letter-spacing:3px;margin-bottom:4px;font-family:'Syne',sans-serif;position:relative;z-index:1;}
+.bc-meta{display:flex;gap:20px;font-size:10px;opacity:.7;position:relative;z-index:1;}
+.policy-box{background:var(--dk3);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:12px;}
+.policy-box h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.policy-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--muted);line-height:1.5;}
+.policy-item:last-child{border-bottom:none;}
+.policy-item::before{content:'•';color:var(--or);font-size:16px;flex-shrink:0;line-height:1.2;}
+.policy-accept{display:flex;align-items:flex-start;gap:10px;padding:14px;background:rgba(139,92,246,.06);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.2s;}
+.policy-accept:hover{border-color:var(--or);}
+.policy-accept input[type=checkbox]{accent-color:var(--or);width:16px;height:16px;flex-shrink:0;margin-top:2px;}
+.policy-accept-text{font-size:12px;color:var(--txt);line-height:1.5;}
+.policy-accept-text a{color:var(--or);text-decoration:none;}
+.reg-nav{display:flex;gap:10px;margin-top:20px;}
+.btn-reg-back{flex:1;background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);border-radius:12px;padding:13px;font-size:14px;font-weight:600;transition:.2s;}
+.btn-reg-back:hover{border-color:var(--or);}
+.btn-reg-next{flex:2;background:linear-gradient(135deg,var(--or),#DB2777);color:white;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:.2s;letter-spacing:.3px;}
+.btn-reg-next:hover{opacity:.9;}
+.btn-reg-next:active{transform:scale(.98);}
+.success-screen{display:none;text-align:center;padding:48px 24px;}
+.success-screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;}
+.success-icon{width:80px;height:80px;background:linear-gradient(135deg,var(--or),#DB2777);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;animation:popIn .5s cubic-bezier(.22,1,.36,1);}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-screen h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;}
+.success-screen p{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;margin:0 auto 24px;}
+.success-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+.stag{padding:6px 14px;background:var(--dk3);border:1px solid var(--bdr);border-radius:20px;font-size:11px;color:var(--muted);}
+.field-select{width:100%;background:var(--dk3);border:1px solid var(--bdr);color:var(--txt);border-radius:10px;padding:12px 14px;font-size:14px;transition:.2s;outline:none;appearance:none;cursor:pointer;}
+.field-select:focus{border-color:var(--or);}
+.input-icon-wrap{position:relative;}
+.input-icon-wrap .form-input{padding-left:38px;}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SPLASH
+══════════════════════════════════════════ -->
+<div id="splash" class="screen active">
+  <div class="logo-big">Fix<span>It</span></div>
+  <p class="tagline">Home services, right at your door</p>
+  <div class="role-grid">
+    <div class="role-btn" onclick="goLogin('customer')">
+      <div class="rb-icon">🏠</div>
+      <h3>Customer</h3>
+      <p>Book a service</p>
+    </div>
+    <div class="role-btn" onclick="goLogin('provider')">
+      <div class="rb-icon">🔧</div>
+      <h3>Provider</h3>
+      <p>Accept jobs</p>
+    </div>
+    <div class="role-btn" onclick="goLogin('admin')">
+      <div class="rb-icon">⚙️</div>
+      <h3>Admin</h3>
+      <p>Manage platform</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LOGIN
+══════════════════════════════════════════ -->
+<div id="login-screen" class="screen">
+  <div class="login-box">
+    <div class="login-logo">Fix<span>It</span></div>
+    <p class="login-sub" id="login-subtitle">Welcome back</p>
+    <div class="login-tabs">
+      <div class="ltab active" id="tab-login" onclick="switchLoginTab('login')">Sign In</div>
+      <div class="ltab" id="tab-signup" onclick="switchLoginTab('signup')">Sign Up</div>
+    </div>
+    <div id="login-form">
+      <div class="form-group"><label>Phone Number</label><input class="form-input" id="li-phone" type="tel" placeholder="+91 98765 43210" /></div>
+      <div class="form-group"><label>Password</label><input class="form-input" id="li-pass" type="password" placeholder="••••••••" /></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+      <p class="otp-note">Or sign in with OTP · <a href="#" style="color:var(--or);text-decoration:none" onclick="showToast('OTP sent! ✓','info')">Send OTP</a></p>
+    </div>
+    <div id="signup-form" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input class="form-input" placeholder="Chandu" /></div>
+        <div class="form-group"><label>Last Name</label><input class="form-input" placeholder="Kumar" /></div>
+      </div>
+      <div class="form-group"><label>Phone</label><input class="form-input" type="tel" placeholder="+91 98765 43210" /></div>
+      <div class="form-group"><label>Email</label><input class="form-input" type="email" placeholder="you@email.com" /></div>
+      <div class="form-group"><label>Password</label><input class="form-input" type="password" placeholder="Create password" /></div>
+      <button class="btn-primary" onclick="doSignup()">Create Account →</button>
+    </div>
+    <div class="demo-links">
+      <div class="demo-link" onclick="quickDemo('customer')">👤 Demo Customer</div>
+      <div class="demo-link" onclick="quickDemo('provider')">🔧 Demo Provider</div>
+      <div class="demo-link" onclick="quickDemo('admin')">⚙️ Demo Admin</div>
+      <div class="demo-link" style="border-color:var(--or);color:var(--or)" onclick="loginRole='provider';goProvRegister()">📝 Register as Provider</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CUSTOMER — HOME
+══════════════════════════════════════════ -->
+<div id="cust-home" class="screen">
+  <div class="topbar">
+    <div class="logo">Fix<span>It</span></div>
+    <div class="tb-right">
+      <div class="notif-btn" onclick="toggleNotifs()">🔔<span class="notif-dot"></span></div>
+      <div class="avatar-chip" onclick="custNav('profile')"><div class="chip-avatar">👤</div><span class="chip-name">Chandu</span></div>
+    </div>
+  </div>
+  <div class="loc-bar">
+    <div class="loc-dot"></div>
+    <div class="loc-txt"><strong>Koramangala, Bengaluru</strong><small>Your current location</small></div>
+    <span class="loc-range">📍 2 km</span>
+  </div>
+  <div class="slabel" style="margin-top:6px">Choose a Service</div>
+  <div class="svc-grid" id="svc-grid"></div>
+  <div class="dropdown-wrap"><div id="drop-panel" style="display:none"></div></div>
+  <div class="slabel">Recent Bookings</div>
+  <div class="booking-card">
+    <div class="bc-top"><div class="bc-title">⚡ Wiring Repair</div><span class="badge completed">Completed</span></div>
+    <div class="bc-info">
+      <div class="bc-i"><strong>Rajesh K.</strong>Provider</div>
+      <div class="bc-i"><strong>Mar 8, 2026</strong>Date</div>
+      <div class="bc-i"><strong>₹ 650</strong>Paid</div>
+    </div>
+    <div class="bc-actions"><button class="btn-sm btn-rate" onclick="openRating()">★ Rate Service</button></div>
+  </div>
+  <div class="booking-card" style="margin-bottom:100px">
+    <div class="bc-top"><div class="bc-title">🧹 Deep Cleaning</div><span class="badge completed">Completed</span></div>
+    <div class="bc-info">
+      <div class="bc-i"><strong>Priya M.</strong>Provider</div>
+      <div class="bc-i"><strong>Feb 28, 2026</strong>Date</div>
+      <div class="bc-i"><strong>₹ 1,200</strong>Paid</div>
+    </div>
+    <div class="bc-actions"><button class="btn-sm btn-rate" onclick="openRating()">★ Rate Service</button></div>
+  </div>
+  <div class="bnav">
+    <div class="bnav-item active" onclick="custNav('home')"><span class="bnav-icon">🏠</span>Home</div>
+    <div class="bnav-item" onclick="custNav('bookings')"><span class="bnav-icon">📋</span>Bookings</div>
+    <div class="bnav-item" onclick="custNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item" onclick="custNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CUSTOMER — BOOKINGS
+══════════════════════════════════════════ -->
+<div id="cust-bookings" class="screen">
+  <div class="topbar"><div class="logo">Fix<span>It</span></div><button class="back-btn" onclick="custNav('home')">← Home</button></div>
+  <div style="padding:14px 18px 0"><div class="slabel" style="padding:0;margin-bottom:0">MY BOOKINGS</div></div>
+  <div style="padding:14px 18px 100px">
+    <div class="booking-card">
+      <div class="bc-top"><div class="bc-title">🔧 Pipe Leak Repair</div><span class="badge active">On The Way</span></div>
+      <div class="bc-info">
+        <div class="bc-i"><strong>Ramesh K.</strong>Provider</div>
+        <div class="bc-i"><strong>Today, 4:30 PM</strong>Scheduled</div>
+        <div class="bc-i"><strong>₹ 299</strong>Est.</div>
+      </div>
+      <div class="bc-actions">
+        <button class="btn-sm btn-track" onclick="openTracking()">🗺️ Track</button>
+        <button class="btn-sm btn-rate" onclick="showToast('Call placed!','info')">📞 Call</button>
+        <button class="btn-sm btn-cancel" onclick="showToast('Booking cancelled','error')">Cancel</button>
+      </div>
+    </div>
+    <div class="booking-card">
+      <div class="bc-top"><div class="bc-title">❄️ AC Service</div><span class="badge pending">Scheduled</span></div>
+      <div class="bc-info">
+        <div class="bc-i"><strong>Suresh N.</strong>Provider</div>
+        <div class="bc-i"><strong>Mar 14, 10:00 AM</strong>Scheduled</div>
+        <div class="bc-i"><strong>₹ 499</strong>Est.</div>
+      </div>
+      <div class="bc-actions"><button class="btn-sm btn-cancel" onclick="showToast('Booking cancelled','error')">Cancel</button></div>
+    </div>
+    <div class="booking-card">
+      <div class="bc-top"><div class="bc-title">⚡ Wiring Repair</div><span class="badge completed">Completed</span></div>
+      <div class="bc-info">
+        <div class="bc-i"><strong>Rajesh K.</strong>Provider</div>
+        <div class="bc-i"><strong>Mar 8, 2026</strong>Date</div>
+        <div class="bc-i"><strong>₹ 650</strong>Paid</div>
+      </div>
+      <div class="bc-actions"><button class="btn-sm btn-rate" onclick="openRating()">★ Rate</button></div>
+    </div>
+    <div class="booking-card">
+      <div class="bc-top"><div class="bc-title">🧹 Deep Cleaning</div><span class="badge cancelled">Cancelled</span></div>
+      <div class="bc-info">
+        <div class="bc-i"><strong>—</strong>Provider</div>
+        <div class="bc-i"><strong>Mar 1, 2026</strong>Date</div>
+        <div class="bc-i"><strong>Refunded</strong>Payment</div>
+      </div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bnav-item" onclick="custNav('home')"><span class="bnav-icon">🏠</span>Home</div>
+    <div class="bnav-item active" onclick="custNav('bookings')"><span class="bnav-icon">📋</span>Bookings</div>
+    <div class="bnav-item" onclick="custNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item" onclick="custNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CUSTOMER — CHAT
+══════════════════════════════════════════ -->
+<div id="cust-chat" class="screen">
+  <div class="topbar"><div class="logo">Fix<span>It</span></div><button class="back-btn" onclick="custNav('home')">← Home</button></div>
+  <div id="chat-list">
+    <div class="chat-list-item" onclick="openChatWindow('Ramesh Kumar','🔧','Plumber')">
+      <div class="chat-av">🔧</div>
+      <div class="chat-info">
+        <div class="chat-name">Ramesh Kumar <span style="font-size:10px;color:var(--muted);font-weight:400">· Plumber</span></div>
+        <div class="chat-preview">I'll be there in 10 minutes, sir</div>
+      </div>
+      <div class="chat-meta"><div class="chat-time">4:22 PM</div><div class="chat-unread">2</div></div>
+    </div>
+    <div class="chat-list-item" onclick="openChatWindow('Priya Menon','🧹','Housekeeping')">
+      <div class="chat-av">🧹</div>
+      <div class="chat-info">
+        <div class="chat-name">Priya Menon <span style="font-size:10px;color:var(--muted);font-weight:400">· Housekeeping</span></div>
+        <div class="chat-preview">Thank you for the 5-star rating!</div>
+      </div>
+      <div class="chat-meta"><div class="chat-time">Yesterday</div></div>
+    </div>
+    <div class="chat-list-item" onclick="openChatWindow('Suresh Nair','❄️','AC Tech')">
+      <div class="chat-av">❄️</div>
+      <div class="chat-info">
+        <div class="chat-name">Suresh Nair <span style="font-size:10px;color:var(--muted);font-weight:400">· AC Tech</span></div>
+        <div class="chat-preview">Your appointment is confirmed for Mar 14</div>
+      </div>
+      <div class="chat-meta"><div class="chat-time">Mar 9</div></div>
+    </div>
+  </div>
+  <div id="chat-window" style="display:none;flex:1;flex-direction:column">
+    <div class="topbar" style="position:static">
+      <button class="back-btn" onclick="closeChatWindow()">← Back</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="chat-av" style="width:32px;height:32px;font-size:14px" id="cw-av">🔧</div>
+        <div><div style="font-size:14px;font-weight:600" id="cw-name">—</div><div style="font-size:10px;color:var(--grn)">● Online</div></div>
+      </div>
+      <div class="wbtn" onclick="showToast('Calling...','info')">📞</div>
+    </div>
+    <div class="chat-messages" id="chat-msgs">
+      <div class="msg recv">Hello! I've accepted your booking for pipe repair. I'll be there shortly.<span class="msg-time">4:15 PM</span></div>
+      <div class="msg sent">Great! Please call when you arrive.<span class="msg-time">4:18 PM</span></div>
+      <div class="msg recv">Sure, no problem. I'm about 1.4 km away now.<span class="msg-time">4:20 PM</span></div>
+      <div class="msg recv">I'll be there in 10 minutes, sir<span class="msg-time">4:22 PM</span></div>
+    </div>
+    <div class="chat-input-bar">
+      <input class="chat-input" id="chat-in" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()" />
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+  <div class="bnav" id="chat-bnav">
+    <div class="bnav-item" onclick="custNav('home')"><span class="bnav-icon">🏠</span>Home</div>
+    <div class="bnav-item" onclick="custNav('bookings')"><span class="bnav-icon">📋</span>Bookings</div>
+    <div class="bnav-item active" onclick="custNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item" onclick="custNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CUSTOMER — PROFILE
+══════════════════════════════════════════ -->
+<div id="cust-profile" class="screen">
+  <div class="topbar"><div class="logo">Fix<span>It</span></div><button class="back-btn" onclick="custNav('home')">← Home</button></div>
+  <div class="profile-hero">
+    <div class="ph-row"><div class="ph-av">👤</div><div class="ph-info"><h2>Chandu Kumar</h2><p>+91 98765 43210 · Koramangala</p></div></div>
+    <div class="ph-stats">
+      <div class="ph-stat"><div class="ph-stat-v">12</div><div class="ph-stat-l">Bookings</div></div>
+      <div class="ph-stat"><div class="ph-stat-v">₹ 8.4k</div><div class="ph-stat-l">Total Spent</div></div>
+      <div class="ph-stat"><div class="ph-stat-v">4.9★</div><div class="ph-stat-l">Avg Rating</div></div>
+    </div>
+  </div>
+  <div class="settings-list">
+    <div class="setting-item" onclick="showToast('Opening addresses...')"><div class="si-icon2">📍</div><div class="si-text"><div class="si-title">Saved Addresses</div><div class="si-hint">Home, Work & more</div></div><span class="si-arrow">›</span></div>
+    <div class="setting-item" onclick="showToast('Opening payments...')"><div class="si-icon2">💳</div><div class="si-text"><div class="si-title">Payment Methods</div><div class="si-hint">UPI, Card, Wallet</div></div><span class="si-arrow">›</span></div>
+    <div class="setting-item" onclick="showToast('Opening notifications...')"><div class="si-icon2">🔔</div><div class="si-text"><div class="si-title">Notifications</div><div class="si-hint">Booking updates & promos</div></div><span class="si-arrow">›</span></div>
+    <div class="setting-item" onclick="showToast('Opening help...')"><div class="si-icon2">💬</div><div class="si-text"><div class="si-title">Help & Support</div><div class="si-hint">FAQs, chat support</div></div><span class="si-arrow">›</span></div>
+    <div class="setting-item" onclick="showToast('Opening about...')"><div class="si-icon2">ℹ️</div><div class="si-text"><div class="si-title">About FixIt</div><div class="si-hint">Version 2.0</div></div><span class="si-arrow">›</span></div>
+  </div>
+  <button class="signout-btn" onclick="goScreen('splash')">Sign Out</button>
+  <div class="bnav">
+    <div class="bnav-item" onclick="custNav('home')"><span class="bnav-icon">🏠</span>Home</div>
+    <div class="bnav-item" onclick="custNav('bookings')"><span class="bnav-icon">📋</span>Bookings</div>
+    <div class="bnav-item" onclick="custNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item active" onclick="custNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TRACKING SCREEN
+══════════════════════════════════════════ -->
+<div id="tracking-screen" class="screen">
+  <div class="topbar" style="position:static"><button class="back-btn" onclick="custNav('bookings')">← Back</button><div class="logo">Fix<span>It</span></div><span class="live-pill">LIVE</span></div>
+  <div id="map"></div>
+  <div class="tracking-body">
+    <div class="status-track">
+      <div class="st-step"><div class="st-dot done">✓</div><div class="st-lbl">Booked</div></div>
+      <div class="st-step"><div class="st-dot done">✓</div><div class="st-lbl">Confirmed</div></div>
+      <div class="st-step"><div class="st-dot now">→</div><div class="st-lbl now">On Way</div></div>
+      <div class="st-step"><div class="st-dot">🏠</div><div class="st-lbl">Arrived</div></div>
+    </div>
+    <div class="eta-bar">
+      <div><div class="eta-lbl">Estimated Arrival</div><div class="eta-num" id="eta-timer">12:00</div><div class="eta-sub">1.4 km away · Ramesh Kumar</div></div>
+      <span class="live-pill">LIVE</span>
+    </div>
+    <div class="worker-bar">
+      <div class="wb-av" id="wb-icon">🔧</div>
+      <div class="wb-info"><div class="wb-name" id="wb-name">Ramesh Kumar</div><div class="wb-meta" id="wb-meta">Plumber · ⭐ 4.8 · 143 jobs</div></div>
+      <div class="wb-actions">
+        <div class="wbtn" onclick="showToast('Calling provider...','info')">📞</div>
+        <div class="wbtn" onclick="custNav('chat')">💬</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROVIDER SCREEN
+══════════════════════════════════════════ -->
+<div id="prov-screen" class="screen">
+  <div class="topbar"><div class="logo">Fix<span>It</span></div><div class="tb-right"><div class="notif-btn" onclick="toggleNotifs()">🔔<span class="notif-dot"></span></div><div class="avatar-chip"><div class="chip-avatar">🔧</div><span class="chip-name">Ramesh</span></div></div></div>
+  <div class="prov-hdr">
+    <div class="ph2-top"><div class="ph2-av">🔧</div><div class="ph2-name"><h2>Ramesh Kumar</h2><p>Plumber · ⭐ 4.8 · Koramangala</p></div></div>
+    <div class="toggle-row"><div class="tswitch on" id="avail-sw" onclick="toggleAvail()"></div><div class="tlbl" id="avail-lbl">Online — Accepting Jobs<small>Within 2 km radius</small></div></div>
+  </div>
+  <div class="p-stats">
+    <div class="pstat"><div class="pstat-v">₹ 3.2k</div><div class="pstat-l">Today</div></div>
+    <div class="pstat"><div class="pstat-v">5</div><div class="pstat-l">Jobs</div></div>
+    <div class="pstat"><div class="pstat-v">4.8★</div><div class="pstat-l">Rating</div></div>
+  </div>
+  <div class="slabel">Incoming Request</div>
+  <div class="job-card incoming" id="new-job">
+    <div class="jc-top"><div class="jc-type">🔧 Pipe Leak Repair</div><span class="badge active">NEW</span></div>
+    <div class="jc-info">
+      <div class="ji"><strong>Ananya S.</strong>Customer</div>
+      <div class="ji"><strong>1.2 km</strong>Distance</div>
+      <div class="ji"><strong>₹ 550</strong>Earn</div>
+      <div class="ji"><strong>~30 min</strong>Duration</div>
+    </div>
+    <div class="jc-actions"><button class="btn-accept" onclick="acceptJob()">✓ Accept</button><button class="btn-decline" onclick="declineJob()">✗ Decline</button></div>
+  </div>
+  <div class="slabel" style="margin-top:6px">Completed Today</div>
+  <div class="job-card"><div class="jc-top"><div class="jc-type">🔧 Tap Installation</div><span class="badge completed">Done</span></div><div class="jc-info"><div class="ji"><strong>Vikram N.</strong>Customer</div><div class="ji"><strong>10:30 AM</strong>Time</div><div class="ji"><strong>₹ 800</strong>Earned</div></div></div>
+  <div class="job-card" style="margin-bottom:100px"><div class="jc-top"><div class="jc-type">🔧 Blocked Drain</div><span class="badge completed">Done</span></div><div class="jc-info"><div class="ji"><strong>Sunita R.</strong>Customer</div><div class="ji"><strong>2:15 PM</strong>Time</div><div class="ji"><strong>₹ 600</strong>Earned</div></div></div>
+  <div class="bnav">
+    <div class="bnav-item active" onclick="provNav('jobs')"><span class="bnav-icon">📋</span>Jobs</div>
+    <div class="bnav-item" onclick="provNav('earnings')"><span class="bnav-icon">💰</span>Earnings</div>
+    <div class="bnav-item" onclick="provNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item" onclick="provNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROVIDER — EARNINGS
+══════════════════════════════════════════ -->
+<div id="prov-earnings" class="screen">
+  <div class="topbar"><div class="logo">Fix<span>It</span></div><button class="back-btn" onclick="provNav('jobs')">← Jobs</button></div>
+  <div class="earn-hero">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">THIS WEEK</div>
+    <div class="earn-total">₹ 18,450</div>
+    <div class="earn-lbl">+12% from last week</div>
+    <div class="earn-grid">
+      <div class="earn-box"><div class="eb-val">₹ 3,200</div><div class="eb-lbl">Today</div></div>
+      <div class="earn-box"><div class="eb-val">₹ 54,300</div><div class="eb-lbl">This Month</div></div>
+      <div class="earn-box"><div class="eb-val">32</div><div class="eb-lbl">Jobs Done</div></div>
+      <div class="earn-box"><div class="eb-val">4.8 ★</div><div class="eb-lbl">Avg Rating</div></div>
+    </div>
+  </div>
+  <div class="slabel" style="margin-top:16px">Daily Earnings (This Week)</div>
+  <div class="bar-chart">
+    <div class="bar-row"><span class="bar-day">Mon</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">₹2,100</span></div>
+    <div class="bar-row"><span class="bar-day">Tue</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-val">₹3,050</span></div>
+    <div class="bar-row"><span class="bar-day">Wed</span><div class="bar-track"><div class="bar-fill" style="width:65%"></div></div><span class="bar-val">₹2,480</span></div>
+    <div class="bar-row"><span class="bar-day">Thu</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="bar-val">₹3,420</span></div>
+    <div class="bar-row"><span class="bar-day">Fri</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="bar-val">₹2,750</span></div>
+    <div class="bar-row"><span class="bar-day">Sat</span><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div><span class="bar-val">₹3,650</span></div>
+    <div class="bar-row"><span class="bar-day">Sun</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="bar-val">₹1,000</span></div>
+  </div>
+  <div class="slabel">Recent Transactions</div>
+  <div class="txn-item"><div class="txn-l"><div class="txn-icon">🔧</div><div><div class="txn-name">Pipe Leak Repair</div><div class="txn-date">Today 4:30 PM · Ananya S.</div></div></div><div class="txn-amt">+₹550</div></div>
+  <div class="txn-item"><div class="txn-l"><div class="txn-icon">🔧</div><div><div class="txn-name">Tap Installation</div><div class="txn-date">Today 10:30 AM · Vikram N.</div></div></div><div class="txn-amt">+₹800</div></div>
+  <div class="txn-item" style="margin-bottom:100px"><div class="txn-l"><div class="txn-icon">🔧</div><div><div class="txn-name">Blocked Drain</div><div class="txn-date">Today 2:15 PM · Sunita R.</div></div></div><div class="txn-amt">+₹600</div></div>
+  <div class="bnav">
+    <div class="bnav-item" onclick="provNav('jobs')"><span class="bnav-icon">📋</span>Jobs</div>
+    <div class="bnav-item active" onclick="provNav('earnings')"><span class="bnav-icon">💰</span>Earnings</div>
+    <div class="bnav-item" onclick="provNav('chat')"><span class="bnav-icon">💬</span>Chat</div>
+    <div class="bnav-item" onclick="provNav('profile')"><span class="bnav-icon">👤</span>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADMIN SCREEN
+══════════════════════════════════════════ -->
+<div id="admin-screen" class="screen">
+  <div class="admin-topbar">
+    <div class="admin-logo">Fix<span>It</span> <small style="font-size:12px;color:var(--muted);font-weight:400;font-family:'DM Sans'">Admin</small></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="admin-badge">ADMIN</span>
+      <button class="back-btn" onclick="goScreen('splash')">Sign Out</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <div class="anav-btn active" onclick="adminTab('dashboard')">📊 Dashboard</div>
+    <div class="anav-btn" onclick="adminTab('rates')">💰 Rates</div>
+    <div class="anav-btn" onclick="adminTab('providers')">🔧 Providers</div>
+    <div class="anav-btn" onclick="adminTab('bookings')">📋 Bookings</div>
+    <div class="anav-btn" onclick="adminTab('users')">👥 Users</div>
+    <div class="anav-btn" onclick="adminTab('notifs')">📣 Notifications</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="adm-dashboard" class="admin-section active">
+    <div class="admin-kpis">
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--or)">₹ 2.4L</div><div class="kpi-lbl">Revenue Today</div><div class="kpi-change up">▲ 18% vs yesterday</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--grn)">342</div><div class="kpi-lbl">Active Bookings</div><div class="kpi-change up">▲ 9% vs yesterday</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--blu)">89</div><div class="kpi-lbl">Online Providers</div><div class="kpi-change dn">▼ 3 offline today</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--yel)">4.7★</div><div class="kpi-lbl">Avg Rating</div><div class="kpi-change up">▲ 0.1 this week</div></div>
+    </div>
+    <div class="slabel" style="padding:0;margin-bottom:12px">BOOKINGS BY SERVICE TODAY</div>
+    <div class="bar-chart" style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;margin-bottom:20px">
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Electrician</span><div class="bar-track"><div class="bar-fill" style="width:85%"></div></div><span class="bar-val">85</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Plumber</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="bar-val">72</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Housekeeping</span><div class="bar-track"><div class="bar-fill" style="width:68%"></div></div><span class="bar-val">68</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">AC Tech</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">55</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Carpenter</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="bar-val">40</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Painter</span><div class="bar-track"><div class="bar-fill" style="width:30%"></div></div><span class="bar-val">30</span></div>
+      <div class="bar-row"><span class="bar-day" style="width:90px;text-align:left">Pest Control</span><div class="bar-track"><div class="bar-fill" style="width:22%"></div></div><span class="bar-val">22</span></div>
+    </div>
+    <div class="slabel" style="padding:0;margin-bottom:12px">RECENT ACTIVITY</div>
+    <div class="admin-table">
+      <div class="at-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr;background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase">
+        <div>TIME</div><div>SERVICE</div><div>STATUS</div><div>AMOUNT</div>
+      </div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">4:32 PM</div><div>🔧 Pipe Leak</div><div><span class="status-chip online">Active</span></div><div style="color:var(--grn)">₹ 299</div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">4:28 PM</div><div>⚡ Wiring</div><div><span class="status-chip busy">On Way</span></div><div style="color:var(--grn)">₹ 499</div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">4:15 PM</div><div>🧹 Cleaning</div><div><span class="status-chip" style="background:var(--grn2);color:var(--grn)">Done</span></div><div style="color:var(--grn)">₹ 1,199</div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">4:02 PM</div><div>❄️ AC Service</div><div><span class="status-chip offline">Cancelled</span></div><div style="color:var(--muted)">—</div></div>
+    </div>
+  </div>
+
+  <!-- Rate Management -->
+  <div id="adm-rates" class="admin-section">
+    <div style="background:var(--or3);border:1px solid rgba(219,39,119,.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:12px;display:flex;gap:8px;align-items:flex-start">
+      <span style="font-size:18px">⚠️</span>
+      <div>Rate changes are <strong>live immediately</strong> and visible to all customers. Adjust carefully.</div>
+    </div>
+    <div id="rate-cards-container"></div>
+  </div>
+
+  <!-- Providers -->
+  <div id="adm-providers" class="admin-section">
+    <div class="search-bar"><span>🔍</span><input placeholder="Search providers..." oninput="filterTable(this,'pv-table')" /></div>
+    <div class="admin-table" id="pv-table">
+      <div class="at-row pv-grid" style="background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase">
+        <div>PROVIDER</div><div>SERVICE</div><div>RATING</div><div>JOBS</div><div>STATUS</div>
+      </div>
+      <div class="at-row pv-grid"><div>Ramesh K.</div><div>🔧 Plumber</div><div>⭐ 4.8</div><div>143</div><div><span class="status-chip online">Online</span></div></div>
+      <div class="at-row pv-grid"><div>Suresh N.</div><div>❄️ AC Tech</div><div>⭐ 4.6</div><div>87</div><div><span class="status-chip online">Online</span></div></div>
+      <div class="at-row pv-grid"><div>Priya M.</div><div>🧹 Housekeeping</div><div>⭐ 4.9</div><div>210</div><div><span class="status-chip busy">Busy</span></div></div>
+      <div class="at-row pv-grid"><div>Anil S.</div><div>⚡ Electrician</div><div>⭐ 4.7</div><div>165</div><div><span class="status-chip online">Online</span></div></div>
+      <div class="at-row pv-grid"><div>Kiran P.</div><div>🎨 Painter</div><div>⭐ 4.5</div><div>62</div><div><span class="status-chip offline">Offline</span></div></div>
+      <div class="at-row pv-grid"><div>Meena R.</div><div>🧹 Housekeeping</div><div>⭐ 4.8</div><div>188</div><div><span class="status-chip busy">Busy</span></div></div>
+      <div class="at-row pv-grid"><div>Dev T.</div><div>🪚 Carpenter</div><div>⭐ 4.4</div><div>44</div><div><span class="status-chip offline">Offline</span></div></div>
+    </div>
+  </div>
+
+  <!-- Bookings -->
+  <div id="adm-bookings" class="admin-section">
+    <div class="search-bar"><span>🔍</span><input placeholder="Search bookings..." oninput="filterTable(this,'bk-table')" /></div>
+    <div class="admin-table" id="bk-table">
+      <div class="at-row bk-grid" style="background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase">
+        <div>ID</div><div>SERVICE</div><div>AMOUNT</div><div>STATUS</div>
+      </div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">#FX-1042</div><div>🔧 Pipe Repair</div><div>₹299</div><div><span class="status-chip busy">Active</span></div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">#FX-1041</div><div>⚡ Wiring</div><div>₹499</div><div><span class="status-chip busy">On Way</span></div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">#FX-1040</div><div>🧹 Deep Clean</div><div>₹1,199</div><div><span class="status-chip" style="background:var(--grn2);color:var(--grn)">Done</span></div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">#FX-1039</div><div>❄️ AC Service</div><div>₹499</div><div><span class="status-chip offline">Cancelled</span></div></div>
+      <div class="at-row bk-grid"><div style="color:var(--muted)">#FX-1038</div><div>🪚 Wardrobe</div><div>₹999</div><div><span class="status-chip" style="background:var(--grn2);color:var(--grn)">Done</span></div></div>
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div id="adm-users" class="admin-section">
+    <div class="search-bar"><span>🔍</span><input placeholder="Search users..." oninput="filterTable(this,'us-table')" /></div>
+    <div class="admin-table" id="us-table">
+      <div class="at-row users-grid" style="background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase">
+        <div>USER</div><div>BOOKINGS</div><div>SPENT</div><div>JOINED</div>
+      </div>
+      <div class="at-row users-grid"><div>Chandu K.</div><div>12</div><div>₹8,400</div><div>Jan 2025</div></div>
+      <div class="at-row users-grid"><div>Ananya S.</div><div>8</div><div>₹5,200</div><div>Mar 2025</div></div>
+      <div class="at-row users-grid"><div>Vikram N.</div><div>15</div><div>₹11,800</div><div>Nov 2024</div></div>
+      <div class="at-row users-grid"><div>Sunita R.</div><div>6</div><div>₹3,900</div><div>Feb 2026</div></div>
+      <div class="at-row users-grid"><div>Arjun M.</div><div>22</div><div>₹18,400</div><div>Aug 2024</div></div>
+    </div>
+  </div>
+
+  <!-- Push Notifications -->
+  <div id="adm-notifs" class="admin-section">
+    <div class="rate-card">
+      <div class="rate-hdr"><div class="rate-title">📣 Send Push Notification</div></div>
+      <div class="form-group"><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Target Audience</label>
+        <select class="form-input" id="notif-target" style="width:100%">
+          <option>All Users</option><option>Customers Only</option><option>Providers Only</option><option>Inactive Users (7+ days)</option>
+        </select>
+      </div>
+      <div class="form-group"><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Title</label><input class="form-input" id="notif-title" placeholder="e.g. Special Weekend Offer 🎉" style="width:100%"/></div>
+      <div class="form-group"><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Message</label><textarea class="rating-note" id="notif-msg" rows="3" placeholder="Write your notification message..."></textarea></div>
+      <button class="btn-primary" style="width:100%" onclick="sendPushNotif()">📣 Send Notification</button>
+    </div>
+    <div class="slabel" style="padding:0;margin-bottom:12px;margin-top:4px">SENT HISTORY</div>
+    <div class="admin-table">
+      <div class="at-row" style="grid-template-columns:2fr 1fr 1fr;background:var(--dk3);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase"><div>MESSAGE</div><div>SENT TO</div><div>OPENED</div></div>
+      <div class="at-row" style="grid-template-columns:2fr 1fr 1fr"><div>Weekend 20% off all bookings!</div><div>4,210</div><div style="color:var(--grn)">68%</div></div>
+      <div class="at-row" style="grid-template-columns:2fr 1fr 1fr"><div>New AC services available</div><div>2,100</div><div style="color:var(--grn)">54%</div></div>
+      <div class="at-row" style="grid-template-columns:2fr 1fr 1fr"><div>We miss you! Book now</div><div>890</div><div style="color:var(--yel)">31%</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROVIDER REGISTRATION
+══════════════════════════════════════════ -->
+<div id="prov-register" class="screen">
+  <div class="topbar" style="position:sticky;top:0;z-index:90">
+    <button class="back-btn" onclick="goScreen('login-screen')">← Back</button>
+    <div class="logo">Fix<span>It</span></div>
+    <span style="font-size:11px;color:var(--muted);font-weight:600">Step <span id="reg-step-num">1</span>/4</span>
+  </div>
+
+  <!-- Hero + Step Progress -->
+  <div class="reg-hero">
+    <div class="reg-hero-top">
+      <div class="reg-hero-icon">🔧</div>
+      <div><h2>Provider Registration</h2><p>Join 2,400+ providers earning on FixIt</p></div>
+    </div>
+    <div class="reg-steps">
+      <div class="reg-step">
+        <div class="rs-dot active" id="dot-1">1</div>
+        <div class="rs-lbl active" id="lbl-1">Personal</div>
+      </div>
+      <div class="reg-step">
+        <div class="rs-dot" id="dot-2">2</div>
+        <div class="rs-lbl" id="lbl-2">Services</div>
+      </div>
+      <div class="reg-step">
+        <div class="rs-dot" id="dot-3">3</div>
+        <div class="rs-lbl" id="lbl-3">Bank</div>
+      </div>
+      <div class="reg-step">
+        <div class="rs-dot" id="dot-4">4</div>
+        <div class="rs-lbl" id="lbl-4">Policy</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reg-body">
+
+    <!-- ── STEP 1: Personal Details ── -->
+    <div class="reg-section active" id="reg-s1">
+      <div class="reg-section-hdr">
+        <span class="rsh-icon">👤</span>
+        <div><div class="rsh-title">Personal Information</div><div class="rsh-sub">Your identity & contact details</div></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group"><label>First Name *</label><input class="form-input" id="r-fname" placeholder="Ramesh" /></div>
+        <div class="form-group"><label>Last Name *</label><input class="form-input" id="r-lname" placeholder="Kumar" /></div>
+      </div>
+      <div class="form-group">
+        <label>Mobile Number *</label>
+        <div class="input-icon-wrap"><span class="input-icon">📱</span><input class="form-input" id="r-phone" type="tel" placeholder="+91 98765 43210" /></div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-icon-wrap"><span class="input-icon">✉️</span><input class="form-input" id="r-email" type="email" placeholder="ramesh@email.com" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date of Birth *</label><input class="form-input" id="r-dob" type="date" /></div>
+        <div class="form-group"><label>Gender</label>
+          <select class="field-select" id="r-gender">
+            <option value="">Select</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Full Address *</label>
+        <textarea class="form-input" id="r-addr" rows="2" placeholder="Door No, Street, Area" style="resize:none"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City *</label><input class="form-input" id="r-city" placeholder="Bengaluru" /></div>
+        <div class="form-group"><label>PIN Code *</label><input class="form-input" id="r-pin" type="number" placeholder="560001" /></div>
+      </div>
+      <div class="form-group">
+        <label>Aadhaar Number *</label>
+        <div class="input-icon-wrap"><span class="input-icon">🪪</span><input class="form-input" id="r-aadhaar" type="number" placeholder="XXXX XXXX XXXX" maxlength="12" /></div>
+        <div class="form-hint">🔒 Encrypted & stored securely. For KYC only.</div>
+      </div>
+      <div class="form-group">
+        <label>PAN Number</label>
+        <div class="input-icon-wrap"><span class="input-icon">📄</span><input class="form-input" id="r-pan" placeholder="ABCDE1234F" style="text-transform:uppercase" /></div>
+      </div>
+
+      <div class="reg-section-hdr" style="margin-top:8px">
+        <span class="rsh-icon">📎</span>
+        <div><div class="rsh-title">Identity Documents</div><div class="rsh-sub">Upload clear photos of your documents</div></div>
+      </div>
+      <div class="upload-grid">
+        <div class="upload-box" onclick="fakeUpload(this,'Aadhaar Front')"><div class="ub-icon">🪪</div><div class="ub-title">Aadhaar Front</div><div class="ub-sub">JPG / PNG · Max 5MB</div></div>
+        <div class="upload-box" onclick="fakeUpload(this,'Aadhaar Back')"><div class="ub-icon">🪪</div><div class="ub-title">Aadhaar Back</div><div class="ub-sub">JPG / PNG · Max 5MB</div></div>
+        <div class="upload-box" onclick="fakeUpload(this,'Profile Photo')"><div class="ub-icon">🤳</div><div class="ub-title">Profile Photo</div><div class="ub-sub">Clear selfie required</div></div>
+        <div class="upload-box" onclick="fakeUpload(this,'PAN Card')"><div class="ub-icon">📄</div><div class="ub-title">PAN Card</div><div class="ub-sub">JPG / PNG · Optional</div></div>
+      </div>
+
+      <div class="reg-nav">
+        <button class="btn-reg-next" onclick="regNext(1)">Next: Services & Skills →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Services & Experience ── -->
+    <div class="reg-section" id="reg-s2">
+      <div class="reg-section-hdr">
+        <span class="rsh-icon">🛠️</span>
+        <div><div class="rsh-title">Services & Expertise</div><div class="rsh-sub">Select what you offer & your experience</div></div>
+      </div>
+
+      <div class="form-group"><label>Select Your Services * (choose all that apply)</label>
+        <div class="service-check-grid">
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> 🔧 Plumber</div>
+          <div class="svc-check checked" onclick="toggleSvcCheck(this)"><input type="checkbox" checked /> 🪚 Carpenter</div>
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> ⚡ Electrician</div>
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> 🎨 Painter</div>
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> ❄️ AC Tech</div>
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> 🧹 Housekeeping</div>
+          <div class="svc-check" onclick="toggleSvcCheck(this)"><input type="checkbox" /> 🐛 Pest Control</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Years of Experience *</label>
+        <select class="field-select" id="r-exp">
+          <option value="">Select experience</option>
+          <option>Less than 1 year</option><option>1–2 years</option>
+          <option>3–5 years</option><option>5–10 years</option><option>10+ years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Certifications / Training</label>
+        <input class="form-input" id="r-cert" placeholder="e.g. ITI Electrician, NCVT certified" />
+      </div>
+      <div class="form-group">
+        <label>Languages Spoken *</label>
+        <input class="form-input" id="r-lang" placeholder="e.g. Kannada, Hindi, English" />
+      </div>
+      <div class="form-group">
+        <label>Availability *</label>
+        <select class="field-select" id="r-avail">
+          <option>Full Time (8 AM – 8 PM)</option>
+          <option>Morning Only (8 AM – 1 PM)</option>
+          <option>Afternoon Only (1 PM – 8 PM)</option>
+          <option>Weekdays Only</option>
+          <option>Weekends Only</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Service Radius</label>
+        <select class="field-select" id="r-radius">
+          <option>Within 2 km (Recommended)</option>
+          <option>Within 5 km</option>
+          <option>Within 10 km</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Brief Bio / About You</label>
+        <textarea class="form-input" id="r-bio" rows="3" placeholder="Tell customers about your skills and experience..." style="resize:none"></textarea>
+      </div>
+
+      <div class="reg-section-hdr" style="margin-top:4px">
+        <span class="rsh-icon">📎</span>
+        <div><div class="rsh-title">Work Proof</div><div class="rsh-sub">Photos of past work help build trust</div></div>
+      </div>
+      <div class="upload-grid">
+        <div class="upload-box" onclick="fakeUpload(this,'Work Sample 1')"><div class="ub-icon">📸</div><div class="ub-title">Work Sample 1</div><div class="ub-sub">Optional</div></div>
+        <div class="upload-box" onclick="fakeUpload(this,'Work Sample 2')"><div class="ub-icon">📸</div><div class="ub-title">Work Sample 2</div><div class="ub-sub">Optional</div></div>
+      </div>
+
+      <div class="reg-nav">
+        <button class="btn-reg-back" onclick="regBack(2)">← Back</button>
+        <button class="btn-reg-next" onclick="regNext(2)">Next: Bank Details →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Bank Details ── -->
+    <div class="reg-section" id="reg-s3">
+      <div class="reg-section-hdr">
+        <span class="rsh-icon">🏦</span>
+        <div><div class="rsh-title">Payment & Bank Details</div><div class="rsh-sub">Your earnings are deposited here</div></div>
+      </div>
+
+      <!-- Visual Card Preview -->
+      <div class="bank-card" id="bank-preview">
+        <div class="bc-chip"></div>
+        <div class="bc-num" id="bc-preview-num">•••• •••• •••• ••••</div>
+        <div class="bc-meta">
+          <div><div style="opacity:.6;font-size:9px;margin-bottom:2px">ACCOUNT HOLDER</div><div id="bc-preview-name" style="font-size:11px;font-weight:600">YOUR NAME</div></div>
+          <div><div style="opacity:.6;font-size:9px;margin-bottom:2px">IFSC</div><div id="bc-preview-ifsc" style="font-size:11px;font-weight:600">XXXX0000000</div></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Account Holder Name *</label>
+        <input class="form-input" id="r-acname" placeholder="As per bank records" oninput="document.getElementById('bc-preview-name').textContent=this.value.toUpperCase()||'YOUR NAME'" />
+      </div>
+      <div class="form-group">
+        <label>Account Number *</label>
+        <div class="input-icon-wrap"><span class="input-icon">🔢</span>
+          <input class="form-input" id="r-acnum" type="number" placeholder="XXXXXXXXXXXXXXXX"
+            oninput="let v=this.value.replace(/\D/g,'');let masked=v.slice(0,-4).replace(/./g,'•')+v.slice(-4);document.getElementById('bc-preview-num').textContent=masked||'•••• •••• •••• ••••'" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm Account Number *</label>
+        <input class="form-input" id="r-acnum2" type="number" placeholder="Re-enter account number" />
+      </div>
+      <div class="form-group">
+        <label>IFSC Code *</label>
+        <div class="input-icon-wrap"><span class="input-icon">🏦</span>
+          <input class="form-input" id="r-ifsc" placeholder="e.g. SBIN0001234" style="text-transform:uppercase"
+            oninput="document.getElementById('bc-preview-ifsc').textContent=this.value.toUpperCase()||'XXXX0000000'" />
+        </div>
+        <div class="form-hint">📍 <span id="bank-name-hint">Enter IFSC to auto-detect bank & branch</span></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Bank Name *</label><input class="form-input" id="r-bankname" placeholder="State Bank of India" /></div>
+        <div class="form-group"><label>Account Type *</label>
+          <select class="field-select" id="r-actype">
+            <option>Savings</option><option>Current</option><option>Salary</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>UPI ID (Optional)</label>
+        <div class="input-icon-wrap"><span class="input-icon">📱</span>
+          <input class="form-input" id="r-upi" placeholder="ramesh@upi or 98765@paytm" />
+        </div>
+        <div class="form-hint">✅ Instant payment settlements via UPI</div>
+      </div>
+
+      <!-- Payout Info -->
+      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;color:var(--grn)">💰 Payout Schedule</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8">
+          ✅ Instant UPI settlement after job completion<br>
+          🏦 Bank transfer every Monday (weekly cycle)<br>
+          💳 Minimum payout: ₹ 100<br>
+          📊 Platform commission: 15% per booking<br>
+          🧾 TDS deducted as per Income Tax Act
+        </div>
+      </div>
+
+      <div class="reg-section-hdr" style="margin-top:4px">
+        <span class="rsh-icon">📎</span>
+        <div><div class="rsh-title">Bank Proof</div><div class="rsh-sub">Cancelled cheque or passbook front page</div></div>
+      </div>
+      <div class="upload-grid">
+        <div class="upload-box" onclick="fakeUpload(this,'Cancelled Cheque')"><div class="ub-icon">🏦</div><div class="ub-title">Cancelled Cheque</div><div class="ub-sub">Or passbook scan</div></div>
+        <div class="upload-box" onclick="fakeUpload(this,'Passbook')"><div class="ub-icon">📒</div><div class="ub-title">Passbook Front</div><div class="ub-sub">Account page only</div></div>
+      </div>
+
+      <div class="reg-nav">
+        <button class="btn-reg-back" onclick="regBack(3)">← Back</button>
+        <button class="btn-reg-next" onclick="regNext(3)">Next: Policies →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Policies & Agreement ── -->
+    <div class="reg-section" id="reg-s4">
+      <div class="reg-section-hdr">
+        <span class="rsh-icon">📋</span>
+        <div><div class="rsh-title">Provider Policies</div><div class="rsh-sub">Read and accept before joining</div></div>
+      </div>
+
+      <div class="policy-box">
+        <h4>⚙️ Service Standards</h4>
+        <div class="policy-item">Arrive within the scheduled time. Late arrivals must notify the customer at least 15 minutes in advance.</div>
+        <div class="policy-item">Wear the FixIt-provided uniform or ID badge during every job.</div>
+        <div class="policy-item">Maintain professional behaviour and use polite language at all times.</div>
+        <div class="policy-item">Do not accept cash payments outside the app. All payments must be processed through FixIt.</div>
+        <div class="policy-item">Carry your own tools. FixIt is not responsible for missing equipment.</div>
+      </div>
+
+      <div class="policy-box">
+        <h4>💳 Payment & Earnings Policy</h4>
+        <div class="policy-item">FixIt retains a 15% platform commission on every booking. Your net earnings are credited after deduction.</div>
+        <div class="policy-item">Weekly payouts are processed every Monday for the previous week's completed jobs.</div>
+        <div class="policy-item">Disputed or cancelled bookings (customer fault) will be credited within 3–5 working days.</div>
+        <div class="policy-item">TDS at applicable rates will be deducted as per the Income Tax Act. Annual Form 16A will be provided.</div>
+        <div class="policy-item">Fraudulent transactions will result in immediate account suspension and forfeiture of pending earnings.</div>
+      </div>
+
+      <div class="policy-box">
+        <h4>⭐ Ratings & Performance</h4>
+        <div class="policy-item">Maintain a minimum rating of 3.5 stars to remain active on the platform.</div>
+        <div class="policy-item">Providers with ratings below 3.0 for 3 consecutive weeks will be temporarily suspended.</div>
+        <div class="policy-item">Job cancellation rate must be below 10%. Excessive cancellations reduce your job allocation priority.</div>
+        <div class="policy-item">Accepting a job and not showing up (no-show) is a serious violation and may lead to permanent deactivation.</div>
+      </div>
+
+      <div class="policy-box">
+        <h4>🚫 Code of Conduct</h4>
+        <div class="policy-item">Zero tolerance for harassment, discrimination, or inappropriate behaviour towards customers.</div>
+        <div class="policy-item">Do not solicit direct contact or bookings outside the FixIt platform.</div>
+        <div class="policy-item">Providers must not share customer personal data with any third party.</div>
+        <div class="policy-item">Any damage caused to customer property during a job must be reported immediately via the app.</div>
+        <div class="policy-item">FixIt reserves the right to suspend or permanently deactivate accounts violating these policies.</div>
+      </div>
+
+      <div class="policy-box">
+        <h4>🔒 Privacy & Data</h4>
+        <div class="policy-item">Your Aadhaar, PAN, and bank details are encrypted and used only for KYC and payments.</div>
+        <div class="policy-item">Location data is shared with customers only during an active booking.</div>
+        <div class="policy-item">FixIt will not sell your personal data to third parties.</div>
+      </div>
+
+      <!-- Acceptance Checkboxes -->
+      <div style="margin-top:20px;margin-bottom:4px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase">I Agree & Accept</div>
+
+      <div class="policy-accept" onclick="toggleCheck('chk1',this)">
+        <input type="checkbox" id="chk1" />
+        <div class="policy-accept-text">I have read and agree to the <a href="#">FixIt Provider Terms & Conditions</a> and <a href="#">Service Standards</a>.</div>
+      </div>
+      <div class="policy-accept" onclick="toggleCheck('chk2',this)">
+        <input type="checkbox" id="chk2" />
+        <div class="policy-accept-text">I agree to the <a href="#">Payment & Earnings Policy</a> including the 15% platform commission and weekly payout schedule.</div>
+      </div>
+      <div class="policy-accept" onclick="toggleCheck('chk3',this)">
+        <input type="checkbox" id="chk3" />
+        <div class="policy-accept-text">I confirm all information provided is accurate. I understand that false information may result in permanent account suspension.</div>
+      </div>
+      <div class="policy-accept" onclick="toggleCheck('chk4',this)">
+        <input type="checkbox" id="chk4" />
+        <div class="policy-accept-text">I agree to the <a href="#">Privacy Policy</a> and consent to FixIt collecting and processing my personal data for platform operations.</div>
+      </div>
+
+      <div class="reg-nav" style="margin-top:24px">
+        <button class="btn-reg-back" onclick="regBack(4)">← Back</button>
+        <button class="btn-reg-next" onclick="submitRegistration()">🎉 Submit Application</button>
+      </div>
+    </div>
+
+    <!-- ── SUCCESS ── -->
+    <div class="success-screen" id="reg-success">
+      <div class="success-icon">✅</div>
+      <h2>Application Submitted!</h2>
+      <p>Your provider application is under review. We'll verify your documents and notify you within <strong>24–48 hours</strong>.</p>
+      <div class="success-tags">
+        <div class="stag">📋 KYC Under Review</div>
+        <div class="stag">🏦 Bank Verified</div>
+        <div class="stag">📱 SMS Confirmation Sent</div>
+      </div>
+      <button class="btn-reg-next" style="width:100%;max-width:320px" onclick="goScreen('prov-screen')">Go to Dashboard →</button>
+    </div>
+
+  </div><!-- /reg-body -->
+</div><!-- /prov-register -->
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+<!-- Booking Modal -->
+<div class="modal-bg" id="book-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="bm-title">Book Service</div>
+    <div class="modal-sub" id="bm-sub">Providers within 2 km</div>
+    <div class="detail-row"><span class="dr-lbl">Service</span><span class="dr-val" id="bm-svc">—</span></div>
+    <div class="detail-row"><span class="dr-lbl">Starting from</span><span class="dr-val or" id="bm-price">—</span></div>
+    <div class="detail-row"><span class="dr-lbl">Available providers</span><span class="dr-val grn" id="bm-cnt">3 nearby</span></div>
+    <div class="providers-near"><div class="pnear-hdr">Providers within 2 km</div><div id="bm-provs"></div></div>
+    <div class="detail-row"><span class="dr-lbl">Payment Method</span></div>
+    <div class="payment-methods">
+      <div class="pm-btn sel" onclick="selPay(this)"><span class="pm-icon">📱</span>UPI</div>
+      <div class="pm-btn" onclick="selPay(this)"><span class="pm-icon">💳</span>Card</div>
+      <div class="pm-btn" onclick="selPay(this)"><span class="pm-icon">💵</span>Cash</div>
+      <div class="pm-btn" onclick="selPay(this)"><span class="pm-icon">👛</span>Wallet</div>
+    </div>
+    <button class="book-btn" onclick="confirmBook()">Confirm Booking →</button>
+  </div>
+</div>
+
+<!-- Rating Modal -->
+<div class="modal-bg" id="rate-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Rate Your Experience</div>
+    <div class="modal-sub" id="rate-sub">How was Rajesh K.?</div>
+    <div class="rating-stars" id="stars">
+      <span class="rstar on" onclick="setRating(1)">⭐</span>
+      <span class="rstar on" onclick="setRating(2)">⭐</span>
+      <span class="rstar on" onclick="setRating(3)">⭐</span>
+      <span class="rstar on" onclick="setRating(4)">⭐</span>
+      <span class="rstar" onclick="setRating(5)">⭐</span>
+    </div>
+    <div class="rating-tags" id="rtags">
+      <div class="rtag sel" onclick="this.classList.toggle('sel')">On Time</div>
+      <div class="rtag" onclick="this.classList.toggle('sel')">Professional</div>
+      <div class="rtag sel" onclick="this.classList.toggle('sel')">Good Work</div>
+      <div class="rtag" onclick="this.classList.toggle('sel')">Clean</div>
+      <div class="rtag" onclick="this.classList.toggle('sel')">Friendly</div>
+      <div class="rtag" onclick="this.classList.toggle('sel')">Value for Money</div>
+    </div>
+    <textarea class="rating-note" placeholder="Additional comments (optional)..." rows="3"></textarea>
+    <button class="book-btn" onclick="submitRating()">Submit Rating</button>
+  </div>
+</div>
+
+<!-- Notifications Panel -->
+<div class="notif-panel" id="notif-panel">
+  <div class="np-hdr"><h4>Notifications</h4><button class="np-close" onclick="toggleNotifs()">✕</button></div>
+  <div class="notif-item unread"><span class="ni-icon">🔧</span><div class="ni-text"><div class="ni-title">Provider On The Way</div><div class="ni-msg">Ramesh Kumar is 1.4 km away · ETA 12 min</div><div class="ni-time">Just now</div></div><div class="ni-dot"></div></div>
+  <div class="notif-item unread"><span class="ni-icon">✅</span><div class="ni-text"><div class="ni-title">Booking Confirmed</div><div class="ni-msg">Your AC Service is scheduled for Mar 14 at 10:00 AM</div><div class="ni-time">2 hours ago</div></div><div class="ni-dot"></div></div>
+  <div class="notif-item"><span class="ni-icon">⭐</span><div class="ni-text"><div class="ni-title">Rate Your Last Service</div><div class="ni-msg">How was your experience with Rajesh K.?</div><div class="ni-time">Yesterday</div></div></div>
+  <div class="notif-item"><span class="ni-icon">🎉</span><div class="ni-text"><div class="ni-title">Weekend Offer!</div><div class="ni-msg">20% off all bookings this weekend. Use code FIXIT20</div><div class="ni-time">2 days ago</div></div></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+let services = {
+  plumber:{name:'Plumber',icon:'🔧',subs:[
+    {name:'Pipe Leak Repair',desc:'Fix leaking pipes',price:299},
+    {name:'Tap / Faucet Install',desc:'New tap fitting',price:199},
+    {name:'Blocked Drain',desc:'Clear clogged drains',price:349},
+    {name:'Water Tank Clean',desc:'Full tank cleaning',price:699},
+    {name:'Toilet Repair',desc:'Flush & seat repairs',price:249}
+  ]},
+  carpenter:{name:'Carpenter',icon:'🪚',subs:[
+    {name:'Furniture Assembly',desc:'Assemble flat-pack',price:399},
+    {name:'Door/Window Repair',desc:'Hinges & locks',price:299},
+    {name:'Wardrobe Fitting',desc:'Custom wardrobe install',price:999},
+    {name:'False Ceiling',desc:'POP & gypsum',price:1499}
+  ]},
+  electrician:{name:'Electrician',icon:'⚡',subs:[
+    {name:'Switch & Socket',desc:'Fix/replace switches',price:199},
+    {name:'Fan Installation',desc:'Ceiling fan fitting',price:299},
+    {name:'Wiring & Rewiring',desc:'Full/partial rewiring',price:799},
+    {name:'MCB / Breaker',desc:'Panel repair',price:499},
+    {name:'Light Fixture',desc:'Chandelier/LED fitting',price:349}
+  ]},
+  painter:{name:'Painter',icon:'🎨',subs:[
+    {name:'Interior Wall Paint',desc:'Full room painting',price:2499},
+    {name:'Exterior Paint',desc:'Outer wall painting',price:4999},
+    {name:'Texture Painting',desc:'Artistic textures',price:3499},
+    {name:'Wood Polish',desc:'Furniture polishing',price:999}
+  ]},
+  ac:{name:'AC Tech',icon:'❄️',subs:[
+    {name:'AC Service & Clean',desc:'Filter & coil clean',price:499},
+    {name:'AC Installation',desc:'Split/window AC',price:1299},
+    {name:'Gas Refill',desc:'Refrigerant top-up',price:1499},
+    {name:'AC Repair',desc:'Diagnose & fix',price:699}
+  ]},
+  housekeeping:{name:'Housekeeping',icon:'🧹',subs:[
+    {name:'Regular Cleaning',desc:'Daily/weekly clean',price:399},
+    {name:'Deep Cleaning',desc:'Top-to-bottom clean',price:1199},
+    {name:'Kitchen Cleaning',desc:'Full kitchen scrub',price:599},
+    {name:'Bathroom Clean',desc:'Sanitize bathrooms',price:299},
+    {name:'Sofa/Carpet Clean',desc:'Upholstery cleaning',price:799}
+  ]},
+  pest:{name:'Pest Control',icon:'🐛',subs:[
+    {name:'Cockroach Control',desc:'Full treatment',price:499},
+    {name:'Mosquito Control',desc:'Fogging & spray',price:599},
+    {name:'Termite Treatment',desc:'Pre/post construction',price:1999},
+    {name:'Rodent Control',desc:'Trapping & baiting',price:799},
+    {name:'Bed Bug Treatment',desc:'Heat & chemical',price:1499}
+  ]}
+};
+
+const providers = [
+  {name:'Ramesh Kumar',rating:'4.8',jobs:143,dist:'0.8 km',eta:'8 min',icon:'👨‍🔧'},
+  {name:'Suresh Nair',rating:'4.6',jobs:87,dist:'1.4 km',eta:'14 min',icon:'👷'},
+  {name:'Anil Sharma',rating:'4.9',jobs:210,dist:'1.9 km',eta:'19 min',icon:'🧑‍🔧'}
+];
+
+let activeService=null, selSub=null, selProv=0, loginRole='customer';
+let etaInterval=null, mapInstance=null, workerMarker=null;
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goLogin(role){
+  loginRole=role;
+  document.getElementById('login-subtitle').textContent=
+    role==='admin'?'Admin Portal':role==='provider'?'Provider Login':'Welcome back';
+  goScreen('login-screen');
+}
+
+function doLogin(){
+  if(loginRole==='customer') { goScreen('cust-home'); buildSvcGrid(); showToast('Welcome back, Chandu! 👋'); }
+  else if(loginRole==='provider') { goScreen('prov-screen'); showToast('Welcome, Ramesh! ✓'); }
+  else { goScreen('admin-screen'); buildRateCards(); showToast('Admin access granted ⚙️','info'); }
+}
+
+function doSignup(){
+  if(loginRole==='provider'){ goProvRegister(); showToast('Complete your provider profile ✓'); }
+  else { showToast('Account created! Welcome to FixIt ✓'); setTimeout(()=>doLogin(),600); }
+}
+
+function quickDemo(role){ loginRole=role; doLogin(); }
+
+function switchLoginTab(tab){
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active',tab==='signup');
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
+}
+
+function custNav(tab){
+  const screens={home:'cust-home',bookings:'cust-bookings',chat:'cust-chat',profile:'cust-profile'};
+  goScreen(screens[tab]||'cust-home');
+  if(tab==='home') buildSvcGrid();
+}
+
+function provNav(tab){
+  if(tab==='earnings') goScreen('prov-earnings');
+  else if(tab==='chat') { goScreen('cust-chat'); openChatWindow('Ananya S.','👤','Customer'); }
+  else if(tab==='profile') goProvRegister();
+  else goScreen('prov-screen');
+}
+
+// ══════════════════════════════════════════
+// SERVICE GRID
+// ══════════════════════════════════════════
+function buildSvcGrid(){
+  const g=document.getElementById('svc-grid'); if(!g) return;
+  g.innerHTML=Object.entries(services).map(([k,v])=>`
+    <div class="svc-tile ${activeService===k?'active':''}" onclick="toggleSvc('${k}')">
+      <div class="ti">${v.icon}</div>
+      <div class="tn">${v.name}</div>
+    </div>`).join('')+`<div class="svc-tile" style="opacity:.3;pointer-events:none"><div class="ti">➕</div><div class="tn">More</div></div>`;
+}
+
+function toggleSvc(key){
+  const panel=document.getElementById('drop-panel');
+  if(activeService===key){ activeService=null; panel.style.display='none'; buildSvcGrid(); return; }
+  activeService=key;
+  buildSvcGrid();
+  const svc=services[key];
+  panel.style.display='block';
+  panel.innerHTML=`<div class="drop-panel">
+    <div class="drop-hdr"><span style="font-size:22px">${svc.icon}</span><h3>${svc.name} Services</h3></div>
+    <div class="sub-list">${svc.subs.map((s,i)=>`
+      <div class="sub-item" onclick="openBookModal('${key}',${i})">
+        <div class="si-l"><div class="si-icon">${svc.icon}</div>
+          <div><div class="si-name">${s.name}</div><div class="si-desc">${s.desc}</div></div>
+        </div>
+        <span class="si-price">₹ ${s.price.toLocaleString('en-IN')}</span>
+      </div>`).join('')}
+    </div></div>`;
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ══════════════════════════════════════════
+// BOOKING MODAL
+// ══════════════════════════════════════════
+function openBookModal(svcKey, subIdx){
+  const svc=services[svcKey], sub=svc.subs[subIdx];
+  selSub={svcKey,subIdx}; selProv=0;
+  document.getElementById('bm-title').textContent=sub.name;
+  document.getElementById('bm-sub').textContent=`${svc.name} · Within 2 km of your location`;
+  document.getElementById('bm-svc').textContent=`${svc.icon} ${svc.name}`;
+  document.getElementById('bm-price').textContent=`₹ ${sub.price.toLocaleString('en-IN')}`;
+  document.getElementById('bm-provs').innerHTML=providers.map((p,i)=>`
+    <div class="prov-row ${i===0?'sel':''}" id="pr-${i}" onclick="selPro(${i})">
+      <div class="prov-av">${p.icon}</div>
+      <div class="prov-info"><div class="prov-nm">${p.name}</div>
+        <div class="prov-mt"><span class="stars">★★★★${p.rating>=4.7?'★':'☆'}</span> ${p.rating} · ${p.jobs} jobs</div>
+      </div>
+      <div class="prov-rt"><div class="prov-dist">${p.dist}</div><div class="prov-eta">~${p.eta}</div></div>
+    </div>`).join('');
+  document.getElementById('book-modal').classList.add('open');
+}
+
+function selPro(i){
+  selProv=i;
+  document.querySelectorAll('.prov-row').forEach((r,idx)=>r.classList.toggle('sel',idx===i));
+}
+
+function selPay(el){
+  document.querySelectorAll('.pm-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function confirmBook(){
+  const p=providers[selProv];
+  const svc=services[selSub.svcKey], sub=svc.subs[selSub.subIdx];
+  document.getElementById('wb-icon').textContent=svc.icon;
+  document.getElementById('wb-name').textContent=p.name;
+  document.getElementById('wb-meta').textContent=`${svc.name} · ⭐ ${p.rating} · ${p.jobs} jobs`;
+  document.getElementById('book-modal').classList.remove('open');
+  openTracking(parseInt(p.eta));
+  showToast(`Booked! ${p.name} is on the way ✓`);
+  addNotif('🔧','Provider Assigned',`${p.name} accepted your ${sub.name} request`);
+}
+
+document.getElementById('book-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+// ══════════════════════════════════════════
+// TRACKING + MAP
+// ══════════════════════════════════════════
+function openTracking(etaMins=12){
+  goScreen('tracking-screen');
+  setTimeout(()=>initMap(), 100);
+  startEta(etaMins*60);
+}
+
+function initMap(){
+  const mapEl=document.getElementById('map');
+  if(mapInstance){ mapInstance.remove(); mapInstance=null; }
+  try {
+    mapInstance=L.map('map',{zoomControl:false,attributionControl:false}).setView([12.9352,77.6245],15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(mapInstance);
+    const homeIcon=L.divIcon({html:'<div style="font-size:26px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))">📍</div>',iconSize:[30,30],iconAnchor:[15,30],className:''});
+    const workerIcon=L.divIcon({html:'<div style="font-size:22px;background:rgba(255,90,31,.9);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:2px solid white">🔧</div>',iconSize:[36,36],iconAnchor:[18,18],className:''});
+    L.marker([12.9352,77.6245],{icon:homeIcon}).addTo(mapInstance).bindPopup('Your Location');
+    workerMarker=L.marker([12.9290,77.6180],{icon:workerIcon}).addTo(mapInstance);
+    L.circle([12.9352,77.6245],{color:'#8B5CF6',fillColor:'rgba(255,90,31,.06)',fillOpacity:1,radius:2000,weight:1,dashArray:'6,6'}).addTo(mapInstance);
+    animateWorker();
+  } catch(e){ console.log('Map init fallback'); }
+}
+
+function animateWorker(){
+  if(!workerMarker) return;
+  const pts=[[12.9290,77.6180],[12.9310,77.6200],[12.9330,77.6225],[12.9345,77.6238]];
+  let i=0;
+  setInterval(()=>{ if(workerMarker){ workerMarker.setLatLng(pts[i%pts.length]); i++; } },2000);
+}
+
+function startEta(secs){
+  clearInterval(etaInterval);
+  const el=document.getElementById('eta-timer');
+  etaInterval=setInterval(()=>{
+    if(secs<=0){ el.textContent='Arrived!'; clearInterval(etaInterval); showToast('Provider has arrived! 🏠'); return; }
+    const m=Math.floor(secs/60), s=secs%60;
+    el.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    secs--;
+  },1000);
+}
+
+// ══════════════════════════════════════════
+// RATING
+// ══════════════════════════════════════════
+let rating=4;
+function openRating(){ document.getElementById('rate-modal').classList.add('open'); }
+function setRating(n){
+  rating=n;
+  document.querySelectorAll('.rstar').forEach((s,i)=>s.classList.toggle('on',i<n));
+}
+function submitRating(){
+  document.getElementById('rate-modal').classList.remove('open');
+  showToast(`Thanks! ${rating}⭐ rating submitted ✓`);
+}
+document.getElementById('rate-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+// ══════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════
+function openChatWindow(name, icon, role){
+  document.getElementById('chat-list').style.display='none';
+  document.getElementById('chat-window').style.display='flex';
+  document.getElementById('cw-name').textContent=`${name} · ${role}`;
+  document.getElementById('cw-av').textContent=icon;
+  document.getElementById('chat-bnav').style.display='flex';
+}
+function closeChatWindow(){
+  document.getElementById('chat-list').style.display='block';
+  document.getElementById('chat-window').style.display='none';
+}
+function sendMsg(){
+  const input=document.getElementById('chat-in');
+  const txt=input.value.trim(); if(!txt) return;
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML+=`<div class="msg sent">${txt}<span class="msg-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+  input.value='';
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    const replies=['Got it, thanks!','On my way!','No problem, sir','Will be there shortly.','Sure!'];
+    msgs.innerHTML+=`<div class="msg recv">${replies[Math.floor(Math.random()*replies.length)]}<span class="msg-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },1200);
+}
+
+// ══════════════════════════════════════════
+// PROVIDER ACTIONS
+// ══════════════════════════════════════════
+let isAvail=true;
+function toggleAvail(){
+  isAvail=!isAvail;
+  document.getElementById('avail-sw').classList.toggle('on',isAvail);
+  document.getElementById('avail-lbl').innerHTML=isAvail?'Online — Accepting Jobs<small>Within 2 km radius</small>':'Offline — Not Accepting<small>Toggle to go online</small>';
+  showToast(isAvail?'You are Online ✓':'You are Offline');
+}
+function acceptJob(){
+  const card=document.getElementById('new-job');
+  card.querySelector('.jc-type').textContent='🔧 Pipe Leak Repair — In Progress';
+  card.querySelector('.badge').className='badge active'; card.querySelector('.badge').textContent='ACTIVE';
+  card.querySelector('.jc-actions').innerHTML=`<button class="btn-accept" style="background:var(--blu)" onclick="showToast('Opening navigation...','info')">🗺️ Navigate</button><button class="btn-accept" onclick="completeJob()">✓ Done</button>`;
+  showToast('Job accepted! Navigate to customer ✓');
+  addNotif('✅','Job Accepted','You accepted Ananya S.\'s pipe repair request');
+}
+function completeJob(){
+  const card=document.getElementById('new-job');
+  card.querySelector('.badge').className='badge completed'; card.querySelector('.badge').textContent='DONE';
+  card.querySelector('.jc-actions').innerHTML=`<span style="font-size:12px;color:var(--grn);font-weight:600">✓ Job completed · ₹ 550 earned</span>`;
+  showToast('Job completed! ₹550 added to wallet 💰');
+}
+function declineJob(){
+  const card=document.getElementById('new-job');
+  card.style.opacity='.35'; card.style.pointerEvents='none';
+  showToast('Job declined','info');
+}
+
+// ══════════════════════════════════════════
+// ADMIN — RATE MANAGEMENT
+// ══════════════════════════════════════════
+function buildRateCards(){
+  const cont=document.getElementById('rate-cards-container');
+  if(!cont) return;
+  cont.innerHTML=Object.entries(services).map(([key,svc])=>`
+    <div class="rate-card">
+      <div class="rate-hdr">
+        <div class="rate-title"><span>${svc.icon}</span> ${svc.name}</div>
+        <button class="rate-save" onclick="saveRates('${key}')">Save Changes</button>
+      </div>
+      <div class="rate-items">
+        ${svc.subs.map((s,i)=>`
+          <div class="rate-item">
+            <div class="ri-name">${s.name}</div>
+            <div class="ri-input-wrap" id="wrap-${key}-${i}">
+              <span class="ri-curr">₹</span>
+              <input class="ri-input" type="number" value="${s.price}" min="0"
+                data-key="${key}" data-idx="${i}"
+                oninput="markChanged(this)"
+                onchange="updateRate('${key}',${i},this.value)" />
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function markChanged(input){
+  const wrap=input.closest('.ri-input-wrap');
+  wrap.classList.add('rate-changed');
+}
+
+function updateRate(key,idx,val){
+  const n=parseInt(val);
+  if(isNaN(n)||n<0) return;
+  services[key].subs[idx].price=n;
+}
+
+function saveRates(key){
+  const inputs=document.querySelectorAll(`input[data-key="${key}"]`);
+  inputs.forEach(inp=>{
+    const wrap=inp.closest('.ri-input-wrap');
+    wrap.classList.remove('rate-changed');
+    updateRate(key,parseInt(inp.dataset.idx),inp.value);
+  });
+  showToast(`${services[key].name} rates updated ✓`);
+}
+
+// ══════════════════════════════════════════
+// ADMIN — OTHER
+// ══════════════════════════════════════════
+function adminTab(tab){
+  document.querySelectorAll('.anav-btn').forEach((b,i)=>b.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  const order=['dashboard','rates','providers','bookings','users','notifs'];
+  const idx=order.indexOf(tab);
+  if(idx>=0) document.querySelectorAll('.anav-btn')[idx].classList.add('active');
+  document.getElementById(`adm-${tab}`).classList.add('active');
+  if(tab==='rates') buildRateCards();
+}
+
+function sendPushNotif(){
+  const title=document.getElementById('notif-title').value;
+  const msg=document.getElementById('notif-msg').value;
+  const target=document.getElementById('notif-target').value;
+  if(!title||!msg){ showToast('Fill in title and message','error'); return; }
+  showToast(`Notification sent to ${target} ✓`);
+  document.getElementById('notif-title').value='';
+  document.getElementById('notif-msg').value='';
+}
+
+function filterTable(input, tableId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll(`#${tableId} .at-row:not(:first-child)`).forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'grid':'none';
+  });
+}
+
+// ══════════════════════════════════════════
+// PROVIDER REGISTRATION
+// ══════════════════════════════════════════
+let regStep=1;
+
+function goProvRegister(){
+  regStep=1;
+  goScreen('prov-register');
+  updateRegSteps(1);
+}
+
+function regNext(step){
+  if(step===1){
+    if(!document.getElementById('r-fname').value.trim()||!document.getElementById('r-phone').value.trim()){
+      showToast('Please fill required fields *','error'); return;
+    }
+  }
+  if(step===3){
+    const ac=document.getElementById('r-acnum').value;
+    const ac2=document.getElementById('r-acnum2').value;
+    if(ac && ac2 && ac!==ac2){ showToast('Account numbers do not match','error'); return; }
+    if(document.getElementById('r-ifsc').value.length>0){
+      document.getElementById('bank-name-hint').textContent='✅ Bank detected: '+detectBank(document.getElementById('r-ifsc').value);
+    }
+  }
+  regStep=step+1;
+  document.querySelectorAll('.reg-section').forEach(s=>s.classList.remove('active'));
+  const next=document.getElementById(`reg-s${regStep}`);
+  if(next) next.classList.add('active');
+  document.getElementById('reg-step-num').textContent=regStep;
+  updateRegSteps(regStep);
+  document.querySelector('.reg-body').scrollTop=0;
+  window.scrollTo(0,0);
+}
+
+function regBack(step){
+  regStep=step-1;
+  document.querySelectorAll('.reg-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`reg-s${regStep}`).classList.add('active');
+  document.getElementById('reg-step-num').textContent=regStep;
+  updateRegSteps(regStep);
+  window.scrollTo(0,0);
+}
+
+function updateRegSteps(active){
+  for(let i=1;i<=4;i++){
+    const dot=document.getElementById(`dot-${i}`);
+    const lbl=document.getElementById(`lbl-${i}`);
+    dot.className='rs-dot'+(i<active?' done':i===active?' active':'');
+    dot.textContent=i<active?'✓':i;
+    lbl.className='rs-lbl'+(i===active?' active':'');
+  }
+}
+
+function submitRegistration(){
+  const checks=['chk1','chk2','chk3','chk4'];
+  const unchecked=checks.filter(id=>!document.getElementById(id).checked);
+  if(unchecked.length>0){ showToast('Please accept all policies to continue','error'); return; }
+  document.querySelectorAll('.reg-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('reg-success').classList.add('active');
+  document.getElementById('reg-step-num').textContent='✓';
+  updateRegSteps(5);
+  showToast('Application submitted successfully! ✓');
+}
+
+function toggleSvcCheck(el){
+  el.classList.toggle('checked');
+  el.querySelector('input').checked=el.classList.contains('checked');
+}
+
+function toggleCheck(id, wrap){
+  const cb=document.getElementById(id);
+  cb.checked=!cb.checked;
+  wrap.style.borderColor=cb.checked?'var(--or)':'var(--bdr)';
+}
+
+function fakeUpload(el,name){
+  el.innerHTML=`<div class="ub-icon">✅</div><div class="ub-title" style="color:var(--grn)">${name} Uploaded</div><div class="ub-sub" style="color:var(--muted)">Tap to replace</div>`;
+  el.style.borderColor='var(--grn)';
+  el.style.background='rgba(34,197,94,.04)';
+  showToast(`${name} uploaded ✓`);
+}
+
+function detectBank(ifsc){
+  const map={SBIN:'State Bank of India',HDFC:'HDFC Bank',ICIC:'ICICI Bank',KKBK:'Kotak Mahindra',PUNB:'Punjab National Bank',BARB:'Bank of Baroda',UTIB:'Axis Bank',IOBA:'Indian Overseas Bank'};
+  const prefix=ifsc.slice(0,4).toUpperCase();
+  return map[prefix]||'Bank detected';
+}
+
+// ══════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════
+let notifsOpen=false;
+function toggleNotifs(){
+  notifsOpen=!notifsOpen;
+  document.getElementById('notif-panel').classList.toggle('open',notifsOpen);
+}
+function addNotif(icon,title,msg){
+  const panel=document.getElementById('notif-panel');
+  const item=document.createElement('div');
+  item.className='notif-item unread';
+  item.innerHTML=`<span class="ni-icon">${icon}</span><div class="ni-text"><div class="ni-title">${title}</div><div class="ni-msg">${msg}</div><div class="ni-time">Just now</div></div><div class="ni-dot"></div>`;
+  panel.insertBefore(item,panel.children[1]);
+}
+document.addEventListener('click',function(e){
+  if(notifsOpen && !e.target.closest('#notif-panel') && !e.target.closest('.notif-btn')){
+    notifsOpen=false; document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let toastT=null;
+function showToast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=`toast show ${type}`;
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
